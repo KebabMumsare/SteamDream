@@ -2,7 +2,7 @@
 import './Card.css'
 function Card() {
     return (
-        <div className="bg-blue-300">Card Component</div>
+        <h2 className="underline">Card Component</h2>
     );
 }
 export default Card;

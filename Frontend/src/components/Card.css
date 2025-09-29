@@ -1,7 +1,8 @@
 /* Card component scoped styles */
 /* Use Tailwind utilities via @apply to keep markup clean */
+
 .card-root {
-	@apply text-xl font-semibold text-slate-100 bg-slate-800/40 rounded-lg px-4 py-3 shadow-sm border border-slate-700/50;
+	@apply font-semibold text-slate-100 bg-slate-800/40 rounded-lg px-4 py-3 shadow-sm border border-slate-700/50;
 }
 
 .card-root:hover {
