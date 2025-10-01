@@ -10,14 +10,14 @@ function Navbar() {
       <div className="flex-1 flex justify-center">
         <div className="relative w-[32rem]">
           <img
-            src="/src/components/Icons/Search.png"
+            src="/src/assets/Icons/Search.png"
             alt="Search"
             className="absolute left-5 top-3/4 -translate-y-1/2 w-8 h-8"
           />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full pl-16 pr-6 py-4 rounded-3xl text-white placeholder-white placeholder:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full pl-16 pr-6 py-4 rounded-3xl text-white placeholder-white placeholder:text-xl placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue-400"
             style={{ backgroundColor: '#66C0F4' }}
           />
         </div>
