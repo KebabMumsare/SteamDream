@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 
 import Card from './components/Card';
@@ -15,10 +15,14 @@ function App() {
           path="/"
           element={
             <>
-              <Card />
-              <Card />
-              <Card />
-              <Card />
+              <div className='place-items-center pt-40'>
+                <Card />
+                <Card />
+                <Card />
+                <Card />
+                <Card />
+                <Card />
+              </div>
             </>
           }
         />
