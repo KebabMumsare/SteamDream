@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Card from "./components/Card";
 import Navbar from "./components/Navbar";
 import Profile from "./Profile";
+import Login from "./Login";
 
 function App() {
   return (
@@ -26,7 +27,9 @@ function App() {
       <Routes>
         <Route path="/profile" element={<Profile />} />
       </Routes>
-      
+      <Routes>
+        <Route path="/login" element={<Login />} />
+      </Routes>
     </BrowserRouter>
   );
 }
