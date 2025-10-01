@@ -4,9 +4,9 @@ import './App.css'
 import Card from './components/Card';
 import Navbar from './components/Navbar';
 import Profile from './Profile';
+import Login from './Login'; // Lägg till denna rad
 
 function App() {
-
   return (
     <BrowserRouter>
       <Navbar />
@@ -26,9 +26,8 @@ function App() {
             </>
           }
         />
-      </Routes>
-      <Routes>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/login" element={<Login />} /> 
       </Routes>
     </BrowserRouter>
   )

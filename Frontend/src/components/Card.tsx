@@ -3,7 +3,6 @@ import testbild from '../assets/testbild.jpg';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
 import star from '../assets/Icons/star.png';
-import './Card.css'
 function Card() {
     return (
         <>
