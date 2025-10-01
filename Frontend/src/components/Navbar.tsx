@@ -1,11 +1,20 @@
+import { useNavigate } from "react-router-dom";
+
 function Navbar() {
+  const navigate = useNavigate();
+
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 mt-10 py-5 px-8 shadow flex items-center justify-between text-white rounded-full w-[90vw] mx-auto"
       style={{ backgroundColor: '#1B2838' }}
     >
-      <span className="font-bold text-xl tracking-wide rounded-full px-4 py-2" style={{ backgroundColor: '#1B2838' }}>
-        SteamDream
+      <span className="font-bold text-xl tracking-wide rounded-full px-4 py-2 flex items-center justify-center" style={{ backgroundColor: '#1B2838' }}>
+        <img
+          src="/src/assets/Icons/Logo.png"
+          alt="Logo"
+          className="w-14 h-14 object-contain"
+          style={{ maxHeight: '3.5rem', maxWidth: '3.5rem' }}
+        />
       </span>
       <div className="flex-1 flex justify-center">
         <div className="relative w-[32rem]">
@@ -33,8 +42,9 @@ function Navbar() {
         </li>
         <li>
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center"
+            className="w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
             style={{ backgroundColor: '#66C0F4' }}
+            onClick={() => navigate("/login")}
           >
             <img src="/src/assets/Icons/Profile.gif" alt="Profile" className="w-14 h-14" />
           </div>
