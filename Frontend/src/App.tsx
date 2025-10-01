@@ -11,6 +11,10 @@ function App() {
       </h1>
       <Card />
       <Card />
+      <Card />
+      <Card />
+      <Card />
+      <Card />
     </>
   )
 }
