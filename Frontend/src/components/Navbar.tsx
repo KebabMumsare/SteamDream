@@ -28,7 +28,7 @@ function Navbar() {
             className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{ backgroundColor: '#66C0F4' }}
           >
-             <img src="/src/components/Icons/Bookmark.gif" alt="Bookmark" className="w-12 h-12" />
+             <img src="/src/assets/Icons/Bookmark.gif" alt="Bookmark" className="w-12 h-12" />
           </div>
         </li>
         <li>
@@ -36,7 +36,7 @@ function Navbar() {
             className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{ backgroundColor: '#66C0F4' }}
           >
-            <img src="/src/components/Icons/Profile.gif" alt="Profile" className="w-14 h-14" />
+            <img src="/src/assets/Icons/Profile.gif" alt="Profile" className="w-14 h-14" />
           </div>
         </li>
       </ul>
