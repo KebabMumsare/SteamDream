@@ -20,7 +20,7 @@ function Card() {
         
     }
   return (
-  <div onClick={steamsite} className="hover:scale-101 mt-6 w-full mx-auto max-w-[1300px] bg-[#1B2838] rounded-[40px] p-4 md:p-6 grid gap-8
+  <div onClick={steamsite} className="cursor-pointer hover:scale-101 mt-6 w-full mx-auto max-w-[1300px] bg-[#1B2838] rounded-[40px] p-4 md:p-6 grid gap-8
           sm:grid-cols-1 md:grid-cols-[340px_1fr] lg:grid-cols-[340px_1fr_400px]">
       <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden bg-black/30">
         <img src={testbild} alt="Game artwork" className="w-full h-full object-cover" />
