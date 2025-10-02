@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import testbild from '../assets/testbild.jpg';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
 import star from '../assets/Icons/star.png';
+import gul from '../assets/Icons/gul stjärna.png';
 import './Card.css';
 
 function Card() {
+  const [fav,setFav] = useState(false);
+  function Favknapp() {
+    setFav(prev => !prev);
+  }
 
   return (
   <div className="mt-6 w-full mx-auto max-w-[1300px] bg-[#1B2838] rounded-[40px] p-4 md:p-6 grid gap-8
@@ -19,7 +25,9 @@ function Card() {
                          px-6 h-[58px] flex items-center w-max shadow-sm text-white">
             PAYDAY 3
           </h2>
-          <img src={star} alt="Featured" className="w-10 h-10 object-contain drop-shadow-md bg-[#66C0F4] h-[58px] rounded-tr-[44px] rounded-br-[44px] rounded-bl-[16px] rounded-tl-[16px] w-[60px]" />
+          <button onClick={Favknapp} className='inline-flex items-center justify-center p-0 rounded-md hover:scale-105 bg-transparent border-0 m-0 transition rounded-tr-[44px] rounded-br-[44px] rounded-bl-[16px] rounded-tl-[16px]'>
+            <img src={fav ? gul : star} alt="Featured" className="object-contain drop-shadow-md hover:bg-[#2979A8] bg-[#66C0F4] h-[58px] border-none rounded-tr-[44px] rounded-br-[44px] rounded-bl-[16px] rounded-tl-[16px] w-[60px] w-[40px] h-[40px] object-contain" />
+          </button>
         </div>
         <div className="mt-5 flex flex-row items-end gap-8">
           <div className="flex flex-col items-start leading-none">
