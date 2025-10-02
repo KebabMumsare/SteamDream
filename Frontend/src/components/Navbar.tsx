@@ -55,6 +55,7 @@ function Navbar() {
               width: "3vw",
               height: "3vw",
             }}
+            onClick={() => navigate("/favorite")}
           >
             <img src="/src/assets/Icons/Bookmark.gif" alt="Bookmark" style={{ width: "2vw", height: "2vw" }} />
           </div>

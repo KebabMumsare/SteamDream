@@ -5,6 +5,7 @@ import star from '../assets/Icons/star.png';
 import './Card.css';
 
 function Card() {
+
   return (
   <div className="mt-6 w-full mx-auto max-w-[1300px] bg-[#1B2838] rounded-[40px] p-4 md:p-6 grid gap-8
           sm:grid-cols-1 md:grid-cols-[340px_1fr] lg:grid-cols-[340px_1fr_400px]">
@@ -57,6 +58,7 @@ function Card() {
       </div>
     </div>
   );
+
 }
 
 export default Card;

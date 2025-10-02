@@ -5,6 +5,7 @@ import Card from './components/Card';
 import Navbar from './components/Navbar';
 import Profile from './Profile';
 import Login from './Login'; // Lägg till denna rad
+import Favorite from './Favorite';
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
           path="/"
           element={
             <>
-              <div className='place-items-center pt-40'>
+              <div className='place-items-center pt-40 max-w-[90%] mx-auto'>
                 <Card />
                 <Card />
                 <Card />
@@ -28,6 +29,7 @@ function App() {
         />
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} /> 
+        <Route path="/favorite" element={<Favorite />} />
       </Routes>
     </BrowserRouter>
   )
