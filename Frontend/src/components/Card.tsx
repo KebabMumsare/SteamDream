@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { MouseEvent } from 'react';
 import testbild from '../assets/testbild.jpg';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
@@ -8,12 +9,18 @@ import './Card.css';
 
 function Card() {
   const [fav,setFav] = useState(false);
-  function Favknapp() {
+  function Favknapp(e: MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    e.preventDefault();
     setFav(prev => !prev);
   }
+    function steamsite() {
 
+        window.open("https://store.steampowered.com/app/1272080/PAYDAY_3/", "_blank");
+        
+    }
   return (
-  <div className="mt-6 w-full mx-auto max-w-[1300px] bg-[#1B2838] rounded-[40px] p-4 md:p-6 grid gap-8
+  <div onClick={steamsite} className="hover:scale-101 mt-6 w-full mx-auto max-w-[1300px] bg-[#1B2838] rounded-[40px] p-4 md:p-6 grid gap-8
           sm:grid-cols-1 md:grid-cols-[340px_1fr] lg:grid-cols-[340px_1fr_400px]">
       <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden bg-black/30">
         <img src={testbild} alt="Game artwork" className="w-full h-full object-cover" />
@@ -25,7 +32,7 @@ function Card() {
                          px-6 h-[58px] flex items-center w-max shadow-sm text-white">
             PAYDAY 3
           </h2>
-          <button onClick={Favknapp} className='inline-flex items-center justify-center p-0 rounded-md hover:scale-105 bg-transparent border-0 m-0 transition rounded-tr-[44px] rounded-br-[44px] rounded-bl-[16px] rounded-tl-[16px]'>
+          <button onClick={Favknapp} className='z-48 inline-flex items-center justify-center p-0 rounded-md hover:scale-105 bg-transparent border-0 m-0 transition rounded-tr-[44px] rounded-br-[44px] rounded-bl-[16px] rounded-tl-[16px]'>
             <img src={fav ? gul : star} alt="Featured" className="object-contain drop-shadow-md hover:bg-[#2979A8] bg-[#66C0F4] h-[58px] border-none rounded-tr-[44px] rounded-br-[44px] rounded-bl-[16px] rounded-tl-[16px] w-[60px] w-[40px] h-[40px] object-contain" />
           </button>
         </div>
