@@ -5,7 +5,7 @@ function Navbar() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 mt-10 py-3 px-8 shadow flex items-center justify-between text-white rounded-full w-[90vw] mx-auto"
+      className="fixed top-0 left-0 right-0 z-50 mt-[3%] py-3 px-8 shadow flex items-center justify-between text-white rounded-full w-[90vw] mx-auto"
       style={{ backgroundColor: '#1B2838' }}
     >
       <span className="font-bold text-xl tracking-wide rounded-full px-4 py-2 flex items-center justify-center" style={{ backgroundColor: '#1B2838' }}>
