@@ -49,7 +49,7 @@ function Navbar() {
       <ul className="flex gap-8 items-center">
         <li>
           <div
-            className="rounded-full flex items-center justify-center"
+            className="rounded-full flex items-center justify-center cursor-pointer"
             style={{
               backgroundColor: "#66C0F4",
               width: "3vw",
