@@ -5,13 +5,13 @@ function Favorite() {
         <div className="max-w-[90%] mx-auto">
             <div className='z-49 pt-[10vw] w-[100%]  bottom: [background:linear-gradient(to_bottom,#004E7B_0%,#004E7B_87%,rgba(0,78,123,0)_100%)] fixed left-1/2 transform -translate-x-1/2'>
                 <h1
-                  className="text-white font-mono font-bold text-center mt-[1vw] mb-[5vw]"
+                  className="text-white font-mono font-bold text-center mt-[1vw] mb-[4vw]"
                   style={{ fontSize: "1.9vw" }}
                 >
                   Favorites
                 </h1>
             </div>
-            <div className="pt-[17vw] space-y-12">
+            <div className="pt-[15vw] space-y-12">
                 <Card />
                 <Card />
                 <Card />
