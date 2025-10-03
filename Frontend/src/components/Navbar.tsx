@@ -21,11 +21,11 @@ function Navbar() {
         />
       </span>
       <div className="flex-1 flex justify-center">
-        <div className="relative" style={{ width: "28vw" }}>
+        <div className="relative hover:scale-105" style={{ width: "28vw" }}>
           <img
             src="/src/assets/Icons/Search.png"
             alt="Search"
-            className="absolute"
+            className="absolute hover:scale-105"
             style={{
               left: "1vw",
               top: "50%",
@@ -53,7 +53,7 @@ function Navbar() {
       <ul className="flex gap-8 items-center">
         <li>
           <div
-            className="rounded-full flex items-center justify-center cursor-pointer"
+            className="rounded-full flex items-center justify-center cursor-pointer hover:scale-105 hover:bg-[#2979A8]"
             style={{
               backgroundColor: "#66C0F4",
               width: "3vw",
@@ -66,7 +66,7 @@ function Navbar() {
         </li>
         <li>
           <div
-            className="rounded-full flex items-center justify-center cursor-pointer"
+            className="rounded-full flex items-center hover:scale-105 hover:bg-[#2979A8] justify-center cursor-pointer"
             style={{
               backgroundColor: "#66C0F4",
               width: "3vw",
