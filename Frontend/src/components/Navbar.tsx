@@ -8,12 +8,16 @@ function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 mt-[3%] py-3 px-8 shadow flex items-center justify-between text-white rounded-full w-[90vw] mx-auto"
       style={{ backgroundColor: '#1B2838' }}
     >
-      <span className="font-bold text-xl tracking-wide rounded-full px-4 py-2 flex items-center justify-center" style={{ backgroundColor: '#1B2838' }}>
+      <span
+        className="font-bold text-xl tracking-wide rounded-full px-4 py-2 flex items-center justify-center cursor-pointer"
+        style={{ backgroundColor: '#1B2838' }}
+        onClick={() => navigate("/")}
+      >
         <img
           src="/src/assets/Icons/Logo.png"
           alt="Logo"
           className="object-contain"
-          style={{ width: '3vw', height: '3vw', maxHeight: '3.5vw', maxWidth: '3.5vw' }}
+          style={{ width: '7vw', height: '3vw', minWidth: '40px', minHeight: '24px' }}
         />
       </span>
       <div className="flex-1 flex justify-center">
