@@ -7,6 +7,7 @@ import Profile from './Profile';
 import Login from './Login'; // Lägg till denna rad
 import Favorite from './Favorite';
 
+
 function App() {
   return (
     <BrowserRouter>
