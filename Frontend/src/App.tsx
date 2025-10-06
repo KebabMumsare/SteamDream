@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Profile from './Profile';
 import Login from './Login'; // Lägg till denna rad
 import Favorite from './Favorite';
-import { getPublicGameInfo, getAllGames } from './service/steamApi';
+import { getPublicGameInfo, getAllGames, } from './service/steamApi';
 import { useEffect } from 'react';
 
 function App() {
