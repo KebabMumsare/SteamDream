@@ -4,20 +4,128 @@ import './App.css'
 import Card from './components/Card';
 import Navbar from './components/Navbar';
 import Profile from './Profile';
-import Login from './Login'; // Lägg till denna rad
+import Login from './Login';
 import Favorite from './Favorite';
-import { getPublicGameInfo, getAllGames, } from './service/steamApi';
-import { useEffect } from 'react';
-
+import { getAllGames, getPublicGameInfo } from './service/steamApi';
+import { useEffect, useState } from 'react';
 
 
 function App() {
-
+  const [games, setGames] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [allGames, setAllGames] = useState<any[]>([]);
+  const GAMES_PER_PAGE = 10;
 
   useEffect(() => {
     getPublicGameInfo('1272080');
-    getAllGames();
+    loadAllGames();
   }, []);
+
+  const loadAllGames = async () => {
+    setLoading(true);
+    try {
+      const data = await getAllGames();
+      if (data?.applist?.apps) {
+        setAllGames(data.applist.apps);
+        setTotalPages(Math.ceil(data.applist.apps.length / GAMES_PER_PAGE));
+        loadPage(1); // Load first page
+      }
+    } catch (error) {
+      console.log('Error loading games: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPage = async (pageNumber: number) => {
+    const startIndex = (pageNumber - 1) * GAMES_PER_PAGE;
+    
+    // Load more games than needed to compensate for filtering
+    const loadCount = GAMES_PER_PAGE * 3; // Load triple to ensure we get enough games after filtering
+    const endIndex = startIndex + loadCount;
+    const pageGames = allGames.slice(startIndex, endIndex);
+    
+    setCurrentPage(pageNumber);
+    setLoading(true);
+
+    // Fetch detailed info for each game on this page
+    const detailedGames = await Promise.all(
+      pageGames.map(async (game) => {
+        try {
+          const details = await getPublicGameInfo(game.appid.toString());
+          const gameData = details[game.appid.toString()];
+          
+          if (gameData?.success) {
+            // Merge basic game info with detailed info
+            return {
+              ...game,
+              ...gameData.data,
+              // Ensure we use the detailed info if available
+              name: gameData.data.name || game.name,
+              header_image: gameData.data.header_image,
+              short_description: gameData.data.short_description,
+              price_overview: gameData.data.price_overview,
+              genres: gameData.data.genres,
+              screenshots: gameData.data.screenshots,
+              release_date: gameData.data.release_date,
+              platforms: gameData.data.platforms
+            };
+          }
+        } catch (error) {
+          console.log(`Error loading details for game ${game.appid}:`, error);
+        }
+        
+        // Return basic game info if details fail to load
+        return game;
+      })
+    );
+
+    // Filter to only games, then take exactly GAMES_PER_PAGE
+    const gamesOnly = detailedGames
+      .filter((game: any) => game.type === 'game')
+      .slice(0, GAMES_PER_PAGE);
+
+    setGames(gamesOnly);
+    setLoading(false);
+  };
+
+  const goToPage = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      loadPage(pageNumber);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => goToPage(i)}
+          className={`px-3 py-2 mx-1 rounded ${
+            i === currentPage
+              ? 'bg-[#66C0F4] text-white'
+              : 'bg-gray-600 text-gray-200 hover:bg-gray-500'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return pages;
+  };
+
   return (
     <BrowserRouter>
       <Navbar />
@@ -26,33 +134,66 @@ function App() {
           path="/"
           element={
             <>
-              
-                <div className="max-w-[90%] mx-auto">
-            <div className='z-49 pt-[9vw] w-[100%]  bottom: [background:linear-gradient(to_bottom,#004E7B_0%,#004E7B_87%,rgba(0,78,123,0)_100%)] fixed left-1/2 transform -translate-x-1/2'>
-                <h1
-                  className="text-white font-mono font-bold text-center mt-[2vw] mb-[4vw] underline"
-                  style={{ fontSize: "1.9vw" }}
-                >
-                  SteamDream
-                </h1>
-            </div>
-            <div className="pt-[15vw] space-y-12">
+              <div className="max-w-[90%] mx-auto">
+                <div className='z-49 pt-[9vw] w-[100%] bottom: [background:linear-gradient(to_bottom,#004E7B_0%,#004E7B_87%,rgba(0,78,123,0)_100%)] fixed left-1/2 transform -translate-x-1/2'>
+                  <h1
+                    className="text-white font-mono font-bold text-center mt-[2vw] mb-[4vw] underline"
+                    style={{ fontSize: "1.9vw" }}
+                  >
+                    SteamDream
+                  </h1>
+                </div>
+                
+                <div className="pt-[15vw] space-y-12">
+                  {loading ? (
+                    <div className="text-center text-white">Loading games...</div>
+                  ) : (
+                    games.map((game: any) => (
+                      <Card
+                        key={game.appid}
+                        title={game.name}
+                        image={game.capsule_image}
+                        description={game.short_description}
+                      />
+                    ))
+                  )}
+                </div>
 
-                <Card
-                  title="Counterstrike 2"
-                  image={('data:image/jpeg;base64,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')}
-                  description="Counterstrike 2 är det efterlängtade uppföljaren till en av de mest populära co-op shooters genom tiderna. Gå samman med dina vänner och utför episka rån!"
-                  price={399}
-                  discount={20}
-                  discountedPrice={319}
-                  genre="Co-op FPS"
-                  platforms={["Windows", "Mac"]}
-                  tags={["Action", "Online", "Heist"]}
-                  gamelink='https://store.steampowered.com/app/10/CounterStrike/'
-                />
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center mt-12 mb-8 space-x-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
 
-            </div>
-        </div>
+                    {/* Page Numbers */}
+                    <div className="flex space-x-1">
+                      {renderPageNumbers()}
+                    </div>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+
+                {/* Page Info */}
+                {totalPages > 0 && (
+                  <div className="text-center text-gray-400 mb-4">
+                    Page {currentPage} of {totalPages} ({allGames.length} total games)
+                  </div>
+                )}
+              </div>
             </>
           }
         />

@@ -15,8 +15,11 @@ function Login() {
               margin-top: 4vw !important;
             }
             .steam-icon {
-              width: 14vw !important;
-              height: 14vw !important;
+              width: 6vw !important;
+              height: 6vw !important;
+            }
+            .login-desc {
+              font-size: 3vw !important;
             }
           }
           /* iPad format */
@@ -28,11 +31,11 @@ function Login() {
             }
             .login-title {
               font-size: 3.5vw !important;
-              margin-top: 4vw !important;
+              margin-top: 6vw !important;
             }
             .steam-icon {
-              width: 12vw !important;
-              height: 12vw !important;
+              width: 6vw !important;
+              height: 6vw !important;
             }
           }
           /* Desktop format */
@@ -47,8 +50,8 @@ function Login() {
               margin-top: 4vw !important;
             }
             .steam-icon {
-              width: 4vw !important;
-              height: 4vw !important;
+              width: 3vw !important;
+              height: 3vw !important;
             }
           }
         `}
@@ -63,15 +66,16 @@ function Login() {
         </h2>
         <form className="flex flex-col gap-3 items-center">
           <a href="/auth/steam">
-            <div>
+            <div className="border-2 border-[#FFFFFF] rounded-full p-2 bg-transparent flex items-center justify-center">
               <img
                 src="/src/assets/Icons/SteamLogin.png"
                 alt="Login with Steam"
-                className="steam-icon"
+                className="steam-icon rounded-full"
               />
             </div>
           </a>
         </form>
+      <h3 className="mt-8 text-center login-desc">Log in to see your owned steam games and change the theme on the website</h3>
       </div>
     </div>
   );
