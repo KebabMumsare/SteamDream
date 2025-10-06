@@ -1,24 +1,36 @@
 import { useState } from 'react';
 import type { MouseEvent } from 'react';
-import testbild from '../assets/testbild.jpg';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
 import star from '../assets/Icons/star.png';
 import gul from '../assets/Icons/gul stjärna.png';
 import './Card.css';
 
-function Card() {
+type CardProps = {
+  title: string;
+  image: string;
+  description: string;
+  price?: number;
+  discount?: number;
+  discountedPrice?: number;
+  genre?: string;
+  platforms?: string[]; // e.g., ['Windows', 'Mac']
+  tags?: string[]; // e.g., ['Co-op', 'FPS', 'Online']
+  gamelink?: string;
+};
+
+function Card({title, image, description, price, discount, discountedPrice, genre, platforms, tags, gamelink}: CardProps) {
   const [fav,setFav] = useState(false);
   function Favknapp(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     e.preventDefault();
     setFav(prev => !prev);
   }
-    function steamsite() {
-
-        window.open("https://store.steampowered.com/app/1272080/PAYDAY_3/", "_blank");
-        
+  function steamsite() {
+    if (gamelink) {
+      window.open(gamelink, "_blank");
     }
+  }
   return (
     <div
       onClick={steamsite}
@@ -26,7 +38,7 @@ function Card() {
     >
       {/* Image */}
       <div className="relative aspect-[16/10] rounded-[26px] overflow-hidden bg-black/30">
-        <img src={testbild} alt="Game artwork" className="w-full h-full object-cover" />
+        <img src={image} alt="Game artwork" className="w-full h-full object-cover" />
       </div>
 
       {/* Main content */}
@@ -34,7 +46,7 @@ function Card() {
         {/* Title + Favorite */}
         <div className="flex items-center gap-2.5">
           <h2 className="bg-[#66C0F4] font-mono font-semibold text-lg md:text-xl rounded-[14px] px-4 h-[46px] flex items-center w-max text-white shadow-sm">
-            PAYDAY 3
+            {title}
           </h2>
           <button
             onClick={Favknapp}
@@ -51,25 +63,30 @@ function Card() {
 
         {/* Pricing */}
         <div className="flex flex-row items-end gap-6">
-          <span className="font-mono line-through text-[11px] md:text-xs opacity-70 tracking-wide">19,99$</span>
-          <span className="font-mono text-lg md:text-xl text-white">10,00$</span>
+          <span className="font-mono line-through text-[11px] md:text-xs opacity-70 tracking-wide">{price}</span>
+          <span className="font-mono text-lg md:text-xl text-white">{discountedPrice}</span>
           <span className="font-mono bg-[#44CE3F] text-white rounded-md px-2.5 py-1.5 text-[11px] md:text-xs leading-none shadow">
-            -50%
+            -{discount}%
           </span>
         </div>
 
         {/* Genre + Platforms */}
         <div className="flex flex-wrap items-center gap-3.5">
           <div className="inline-flex items-center font-mono text-[9px] md:text-[11px] text-white bg-[#66C0F4] rounded-lg px-2.5 py-1.5 font-semibold w-max shadow">
-            Strategy & Action
+            {genre}
           </div>
-          <img src={windows} alt="Windows" className="w-6 h-6 object-contain" />
-          <img src={apple} alt="Apple" className="w-6 h-6 object-contain" />
+          {platforms?.map(platform => (
+            <img key={platform} src={platform === 'Windows' ? windows : apple} alt={platform} className="w-6 h-6 object-contain" />
+          ))}
         </div>
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2">
-          <span className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">Co-op</span>
+          {tags?.map(tag => (
+            <span key={tag} className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">
+              {tag}
+            </span>
+          ))}
           <span className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">FPS</span>
           <span className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">Online</span>
         </div>
@@ -79,7 +96,7 @@ function Card() {
       <div className="relative font-mono text-white/90 bg-[#66C0F4] backdrop-blur-sm border border-white/10 rounded-lg p-3.5 md:p-4 text-[11px] md:text-xs leading-relaxed shadow-inner shadow-black/40 max-h-[320px] overflow-auto scrollbar-thin scrollbar-thumb-[#66C0F4]/25 scrollbar-track-transparent">
         <div className="absolute inset-0 pointer-events-none rounded-lg bg-[#66C0F4]/5" />
         <p className="relative z-10">
-          hbvhfbv tert brtb rb rb r b rb ry brbrbr br br ry bry bry ry b rb r ybn r nrf yb r nr n ry nr n ryh br6 h r6 ry bry r nr h r nr nr n r nr n hbvhfbv tert brtb rb rb r b rb ry brbrbr br br ry bry bry ry b rb r ybn r nrf yb r nr n ry nr n ryh br6 h r6 ry bry r nr h r nr nr n r nr n
+          {description}
         </p>
       </div>
     </div>
