@@ -9,6 +9,7 @@ import Favorite from './Favorite';
 import { getAllGames, getPublicGameInfo } from './service/steamApi';
 import { useEffect, useState } from 'react';
 
+
 function App() {
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
