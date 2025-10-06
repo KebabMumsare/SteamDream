@@ -21,11 +21,11 @@ function Navbar() {
         />
       </span>
       <div className="flex-1 flex justify-center">
-        <div className="relative hover:scale-105" style={{ width: "28vw" }}>
+        <div className="relative" style={{ width: "28vw" }}>
           <img
             src="/src/assets/Icons/Search.png"
             alt="Search"
-            className="absolute hover:scale-105"
+            className="absolute"
             style={{
               left: "1vw",
               top: "50%",
