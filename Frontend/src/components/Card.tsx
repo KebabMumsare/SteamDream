@@ -63,8 +63,8 @@ function Card({title, image, description, price, discount, discountedPrice, genr
 
         {/* Pricing */}
         <div className="flex flex-row items-end gap-6">
-          <span className="font-mono line-through text-[11px] md:text-xs opacity-70 tracking-wide">{price}</span>
-          <span className="font-mono text-lg md:text-xl text-white">{discountedPrice}</span>
+          <span className="font-mono line-through text-[11px] md:text-xs opacity-70 tracking-wide">{price}€</span>
+          <span className="font-mono text-lg md:text-xl text-white">{discountedPrice}€</span>
           <span className="font-mono bg-[#44CE3F] text-white rounded-md px-2.5 py-1.5 text-[11px] md:text-xs leading-none shadow">
             -{discount}%
           </span>
