@@ -23,7 +23,7 @@ function Navbar() {
       <div className="flex-1 flex justify-center">
         <div className="relative" style={{ width: "28vw" }}>
           <img
-            src="/src/assets/Icons/Search.png"
+            src="/src/assets/Icons/Search.gif"
             alt="Search"
             className="absolute"
             style={{
@@ -33,6 +33,8 @@ function Navbar() {
               width: "1.7vw",
               height: "1.7vw",
             }}
+            onMouseOver={e => { e.currentTarget.src = `/src/assets/Icons/Search.gif?${Date.now()}`; }}
+            
           />
           <input
             type="text"
@@ -45,8 +47,10 @@ function Navbar() {
               paddingRight: "1vw",
               paddingTop: "1.1vw",
               paddingBottom: "0.9vw",
-              fontSize: "0.9vw", // <-- Ändrar font size på input texten
+              fontSize: "0.9vw",
             }}
+            
+            
           />
         </div>
       </div>
@@ -61,7 +65,13 @@ function Navbar() {
             }}
             onClick={() => navigate("/favorite")}
           >
-            <img src="/src/assets/Icons/Bookmark.gif" alt="Bookmark" style={{ width: "2vw", height: "2vw" }} />
+            <img 
+              src="/src/assets/Icons/Bookmark.gif" 
+              alt="Bookmark" 
+              style={{ width: "2vw", height: "2vw" }}
+              onMouseOver={e => { e.currentTarget.src = `/src/assets/Icons/Bookmark.gif?${Date.now()}`; }}
+              
+            />
           </div>
         </li>
         <li>
@@ -74,7 +84,13 @@ function Navbar() {
             }}
             onClick={() => navigate("/Profile")}
           >
-            <img src="/src/assets/Icons/Profile.gif" alt="Profile" style={{ width: "2.2vw", height: "2.2vw" }} />
+            <img 
+              src="/src/assets/Icons/Profile.gif" 
+              alt="Profile" 
+              style={{ width: "2.2vw", height: "2.2vw" }}
+              onMouseOver={e => { e.currentTarget.src = `/src/assets/Icons/Profile.gif?${Date.now()}`; }}
+             
+            />
           </div>
         </li>
       </ul>
