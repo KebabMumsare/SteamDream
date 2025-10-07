@@ -23,7 +23,6 @@ function App() {
 
   const swapColors = () => {
     const variants = [
-      {ownedGamesHeader: `#8CFC99`, background: '#29BD3B', drawerBg: '#29BD3B', primaryBtn: '#32F349', primaryBtnHover: '#2BCC3E', overlayBg: 'rgba(0, 0, 0, 0.4)', headerBg: '#8CFC99'},
       {ownedGamesHeader: `#66007B`, background: '#1B2838', drawerBg: '#1B2838', primaryBtn: '#D866F4', primaryBtnHover: '#8A3F9C', overlayBg: 'rgba(0, 0, 0, 0.4)', headerBg: '#66007B'},
       {ownedGamesHeader: `#6E6D6E`, background: '#434343', drawerBg: '#434343', primaryBtn: '#B4ADB6', primaryBtnHover: '#747175', overlayBg: 'rgba(0, 0, 0, 0.4)', headerBg: '#6E6D6E'},
       {ownedGamesHeader: `#F6965B`, background: '#B95223', drawerBg: '#B95223', primaryBtn: '#F47246', primaryBtnHover: '#9B2913', overlayBg: 'rgba(0, 0, 0, 0.4)', headerBg: '#F6965B'},
