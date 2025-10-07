@@ -35,7 +35,7 @@ function Profile() {
               </div>
             </aside>
 
-            <main className="flex flex-row gap-[3rem] min-h-screen w-full pt-24 md:pt-28 lg:pt-32 overflow-hidden">
+            <main className="flex flex-row gap-[3rem] min-h-screen w-full pt-24 md:pt-28 lg:pt-32 min-[1400px]:pt-[10%] overflow-hidden">
                 <section className="bg-[#1B2838] w-1/3 p-4 rounded-tr-[60px] max-[500px]:hidden">
                     <h2 className="underline font-mono text-4xl pb-[20px]">Main Settings:</h2>
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] mt-[15px] hover:scale-105 hover:bg-[#2979A8] font-mono text-xl pl-[20px] flex items-center gap-2 bg-[#66C0F4] rounded-full p-2">Color-scheme: <img src="/src/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[51px] h-[35px]" /></button>
