@@ -1,16 +1,25 @@
+
 import { useNavigate } from "react-router-dom";
 
-function Navbar() {
+interface NavbarProps {
+  colors: {
+    background: string;
+    primaryBtn: string;
+    primaryBtnHover: string;
+  };
+}
+
+function Navbar({ colors }: NavbarProps) {
   const navigate = useNavigate();
 
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 mt-[3%] py-3 px-8 shadow flex items-center justify-between text-white rounded-full w-[90vw] mx-auto"
-      style={{ backgroundColor: '#1B2838' }}
+      style={{ backgroundColor: colors.background }}
     >
       <span
         className="font-bold text-xl tracking-wide rounded-full px-4 py-2 flex items-center justify-center cursor-pointer"
-        style={{ backgroundColor: '#1B2838' }}
+        style={{ backgroundColor: colors.background }}
         onClick={() => navigate("/")}
       >
         <img
@@ -39,7 +48,7 @@ function Navbar() {
             placeholder="Search..."
             className="rounded-full text-white placeholder-white placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue-400"
             style={{
-              backgroundColor: "#66C0F4",
+              backgroundColor: colors.primaryBtn,
               width: "100%",
               paddingLeft: "3vw",
               paddingRight: "1vw",
@@ -53,12 +62,14 @@ function Navbar() {
       <ul className="flex gap-8 items-center">
         <li>
           <div
-            className="rounded-full flex items-center justify-center cursor-pointer hover:scale-105 hover:bg-[#2979A8]"
+            className="rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-colors"
             style={{
-              backgroundColor: "#66C0F4",
+              backgroundColor: colors.primaryBtn,
               width: "3vw",
               height: "3vw",
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
             onClick={() => navigate("/favorite")}
           >
             <img src="/src/assets/Icons/Bookmark.gif" alt="Bookmark" style={{ width: "2vw", height: "2vw" }} />
@@ -66,12 +77,14 @@ function Navbar() {
         </li>
         <li>
           <div
-            className="rounded-full flex items-center hover:scale-105 hover:bg-[#2979A8] justify-center cursor-pointer"
+            className="rounded-full flex items-center hover:scale-105 justify-center cursor-pointer transition-colors"
             style={{
-              backgroundColor: "#66C0F4",
+              backgroundColor: colors.primaryBtn,
               width: "3vw",
               height: "3vw",
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
             onClick={() => navigate("/Profile")}
           >
             <img src="/src/assets/Icons/Profile.gif" alt="Profile" style={{ width: "2.2vw", height: "2.2vw" }} />
