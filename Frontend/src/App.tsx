@@ -37,6 +37,15 @@ function App() {
     document.documentElement.style.setProperty('--body-bg', randomVariant.headerBg);
   };
 
+  const [font, setFont] = useState("font-mono");
+
+  const swapFont = () => {
+    const fonts = ["font-mono", "font-sans", "font-serif"];
+    
+    const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
+    setFont(randomFont);
+  };
+
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -225,7 +234,7 @@ function App() {
             </>
           }
         />
-        <Route path="/profile" element={<Profile colors={colors} swapColors={swapColors} />} />
+        <Route path="/profile" element={<Profile colors={colors} swapColors={swapColors} swapFont={swapFont} />} />
         <Route path="/login" element={<Login />} /> 
         <Route path="/favorite" element={<Favorite colors={colors} />} />
       </Routes>
