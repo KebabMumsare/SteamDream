@@ -48,7 +48,7 @@ function Navbar({ colors }: NavbarProps) {
           <input
             type="text"
             placeholder="Search..."
-            className="rounded-full text-white placeholder-white placeholder:font-mono focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="rounded-full text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             style={{
               backgroundColor: colors.primaryBtn,
               width: "100%",
