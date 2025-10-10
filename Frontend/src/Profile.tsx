@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+
 interface ProfileProps {
     colors: {
         background: string;
@@ -9,10 +10,12 @@ interface ProfileProps {
         ownedGamesHeader: string;
         overlayBg: string;
     };
+    
     swapColors: () => void;
+    swapFont: () => void;
 }
 
-function Profile({ colors, swapColors }: ProfileProps) {
+function Profile({ colors, swapColors, swapFont }: ProfileProps) {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     return (
@@ -43,7 +46,7 @@ function Profile({ colors, swapColors }: ProfileProps) {
                 </button>
                 <h2 className="text-white underline font-mono pb-[20px]" style={{ fontSize: '8vw' }}>Main Settings:</h2>
                 <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] mt-[15px] hover:scale-105 font-mono text-xl pl-[20px] flex items-center gap-2 rounded-full p-2 transition-colors" style={{ backgroundColor: colors.primaryBtn }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors} >Color-scheme: <img src="/src/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[51px] h-[35px]" /></button>
-                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] hover:scale-105 font-mono text-xl pl-[20px] flex items-center gap-2 rounded-full p-2 transition-colors" style={{ backgroundColor: colors.primaryBtn }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}>Font-family: <img src="/src/assets/Icons/Font.png" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
+                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] hover:scale-105 font-mono text-xl pl-[20px] flex items-center gap-2 rounded-full p-2 transition-colors" style={{ backgroundColor: colors.primaryBtn }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/src/assets/Icons/Font.png" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
                 <h2 className="text-white underline font-mono pb-[20px] pt-[50px]" style={{ fontSize: '8vw' }}>Login:</h2>
                 <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] hover:scale-105 hover:bg-[#661C1D] font-mono text-xl flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/src/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
               </div>
@@ -54,7 +57,7 @@ function Profile({ colors, swapColors }: ProfileProps) {
                 style={{ backgroundColor: colors.background }}>
                     <h2 className="text-white underline font-mono pb-[20px]" style={{ fontSize: '1.9vw' }}>Main Settings:</h2>
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw]  mt-[15px] hover:scale-105 font-mono text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2 transition-colors" style={{ backgroundColor: colors.primaryBtn }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors}>Color-scheme: <img src="/src/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[2vw] h-[1.3vw]" /></button>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] hover:scale-105 font-mono text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2 transition-colors" style={{ backgroundColor: colors.primaryBtn }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}>Font-family: <img src="/src/assets/Icons/Font.png" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
+                    <button className=" font-mono shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] hover:scale-105  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2 transition-colors" style={{ backgroundColor: colors.primaryBtn}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/src/assets/Icons/Font.png" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     <h2 className="text-white underline font-mono pb-[20px] pt-[50px]" style={{ fontSize: '1.9vw' }}>Login:</h2>
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] hover:scale-105 hover:bg-[#661C1D] font-mono text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/src/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     

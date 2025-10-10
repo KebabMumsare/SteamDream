@@ -57,7 +57,7 @@ function Card({title, image, description, price, discount, discountedPrice, genr
           <button
             onClick={Favknapp}
             aria-pressed={fav}
-            className="inline-flex items-center justify-center p-0 rounded-[14px] hover:scale-105 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66C0F4]/60"
+            className="inline-flex bg-transparent items-center justify-center p-0 rounded-[14px] hover:scale-105 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66C0F4]/60"
             onMouseEnter={(e) => e.currentTarget.querySelector('img')!.style.backgroundColor = colors?.primaryBtnHover || '#2979A8'}
             onMouseLeave={(e) => e.currentTarget.querySelector('img')!.style.backgroundColor = colors?.primaryBtn || '#66C0F4'}
           >
