@@ -62,13 +62,13 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] hover:scale-105 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/src/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     
                 </section>
-                <section className="z-50 flex-1 p-0 h-[calc(100vh-15%)] overflow-y-auto">
+                <section className="z-49 flex-1 p-0 h-[calc(100vh-15%)] overflow-y-auto">
                     <div className="sticky top-0 z-[48]" style={{ backgroundColor: colors.ownedGamesHeader }}>
                         <h1 className="text-white text-center font-bold underline py-3" style={{ fontSize: '1.9vw' }}>Owned games</h1>
                         <div className="hidden max-[500px]:flex justify-center pb-3">
                             <button
                                 onClick={() => setSettingsOpen(true)}
-                                className="text-white rounded-full px-3 py-1.5 shadow transition-colors inline-flex items-center gap-2"
+                                className="text-white rounded-full z-49 px-3 py-1.5 shadow transition-colors inline-flex items-center gap-2"
                                 style={{ backgroundColor: colors.primaryBtn }}
                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
