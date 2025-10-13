@@ -91,7 +91,7 @@ function Navbar({ colors }: NavbarProps) {
       <ul className="flex gap-8 items-center max-[450px]:hidden">
         <li>
           <div
-            className="rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-colors"
+            className="rounded-full flex items-center justify-center cursor-pointer transition delay-150 duration-300 ease-in-out hover:-translate-y-1 transition-colors"
             style={{
               backgroundColor: colors.primaryBtn,
               width: "3vw",
@@ -111,7 +111,7 @@ function Navbar({ colors }: NavbarProps) {
         </li>
         <li>
           <div
-            className="rounded-full flex items-center hover:scale-105 justify-center cursor-pointer transition-colors"
+            className="rounded-full flex items-center transition delay-150 duration-300 ease-in-out hover:-translate-y-1 justify-center cursor-pointer transition-colors"
             style={{
               backgroundColor: colors.primaryBtn,
               width: "3vw",
