@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Profile from './Profile';
 import Login from './Login';
 import Favorite from './Favorite';
-import { getAllGames, getPublicGameInfo } from './service/steamApi';
+//import { getAllGames, getPublicGameInfo } from './service/steamApi';
 import { useEffect, useState } from 'react';
 
 
