@@ -18,13 +18,13 @@ function Favorite({ colors }: FavoriteProps) {
                 </h1>
             </div>
             <div className="max-w-[90%] mx-auto">
-                <div className="pt-[15vw] space-y-12">
-                    <Card title="Sample Game 1" image="/assets/testbild.jpg" description="Sample description" />
-                    <Card title="Sample Game 2" image="/assets/testbild.jpg" description="Sample description" />
-                    <Card title="Sample Game 3" image="/assets/testbild.jpg" description="Sample description" />
-                    <Card title="Sample Game 4" image="/assets/testbild.jpg" description="Sample description" />
-                    <Card title="Sample Game 5" image="/assets/testbild.jpg" description="Sample description" />
-                    <Card title="Sample Game 6" image="/assets/testbild.jpg" description="Sample description" />
+                <div className="pt-[15vw] space-y-12 pb-8">
+                    <Card />
+                    <Card />
+                    <Card />
+                    <Card />
+                    <Card />
+                    <Card />
                 </div>
             </div>
         </>

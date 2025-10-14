@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Game from './components/game';
 
 
 interface ProfileProps {
@@ -9,6 +10,7 @@ interface ProfileProps {
         primaryBtnHover: string;
         ownedGamesHeader: string;
         overlayBg: string;
+        headerBg: string;
     };
     
     swapColors: () => void;
@@ -52,7 +54,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
               </div>
             </aside>
 
-            <main className="flex flex-row gap-[3rem] min-h-screen w-full pt-24 md:pt-28 lg:pt-32 min-[1400px]:pt-[10%] overflow-hidden">
+            <main className="flex flex-row gap-[3rem] h-screen w-full pt-24 md:pt-28 lg:pt-32 min-[1400px]:pt-[10%] overflow-hidden">
                 <section className=" w-1/3 p-4 rounded-tr-[60px] max-[500px]:hidden"
                 style={{ backgroundColor: colors.background }}>
                     <h2 className="text-white underline pb-[20px]" style={{ fontSize: '1.9vw' }}>Main Settings:</h2>
@@ -62,9 +64,10 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     
                 </section>
-                <section className="z-49 flex-1 p-0 h-[calc(100vh-15%)] overflow-y-auto">
-                    <div className="sticky top-0 z-[48]" style={{ backgroundColor: colors.ownedGamesHeader }}>
+                <section className="z-49 flex-1 p-0 overflow-y-auto">
+                    <div className="sticky pb-[20px] top-0 z-[48]" style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 87%, rgba(0,78,123,0) 100%)` }}>
                         <h1 className="text-white text-center font-bold underline py-3" style={{ fontSize: '1.9vw' }}>Owned games</h1>
+
                         <div className="hidden max-[500px]:flex justify-center pb-3">
                             <button
                                 onClick={() => setSettingsOpen(true)}
@@ -80,10 +83,17 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                             </button>
                         </div>
                     </div>
-                    <div className='p-4 space-y-4'>
-                       
+              <div className='p-4 space-y-4 max-w-[90%] mx-auto pb-8'>
+                       <Game />
+                       <Game />
+                       <Game />
+                       <Game />
+                       <Game />  
+                       <Game />
+
                     </div>
                 </section>
+
             </main>
         </>
     )
