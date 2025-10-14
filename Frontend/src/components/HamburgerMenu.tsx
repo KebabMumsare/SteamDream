@@ -40,7 +40,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }
           style={{ backgroundColor: colors.primaryBtn }}
           onClick={() => { navigate('/'); onClose(); }}
         >
-          <img src="/src/assets/Icons/Home.png" alt="Home" style={{ width: 38, height: 38 }} />
+          <img src="/assets/Icons/Home.png" alt="Home" style={{ width: 38, height: 38 }} />
           <span className="text-white underline">Home</span>
         </button>
         <button
@@ -48,7 +48,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }
           style={{ backgroundColor: colors.primaryBtn }}
           onClick={() => { navigate('/favorite'); onClose(); }}
         >
-          <img src="/src/assets/Icons/Bookmark.gif" alt="Favorites" style={{ width: 38, height: 38 }} />
+          <img src="/assets/Icons/Bookmark.gif" alt="Favorites" style={{ width: 38, height: 38 }} />
           <span className="text-white underline">Favorites</span>
         </button>
         <button
@@ -56,7 +56,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }
           style={{ backgroundColor: colors.primaryBtn }}
           onClick={() => { navigate('/Profile'); onClose(); }}
         >
-          <img src="/src/assets/Icons/Profile.gif" alt="Profile" style={{ width: 38, height: 38 }} />
+          <img src="/assets/Icons/Profile.gif" alt="Profile" style={{ width: 38, height: 38 }} />
           <span className="text-white underline">Profile</span>
         </button>
       </div>
@@ -65,3 +65,4 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }
 };
 
 export default HamburgerMenu;
+

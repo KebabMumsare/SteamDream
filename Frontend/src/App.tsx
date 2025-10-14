@@ -1,14 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 
-import Card from './components/Card';
 import Navbar from './components/Navbar';
 import Profile from './Profile';
 import Login from './Login';
 import Favorite from './Favorite';
-import { test, getApplist } from './service/steamApi';
+import { getApplist } from './service/steamApi';
 import { useEffect, useState } from 'react';
-
 
 function App() {
   const [colors, setColors] = useState({
@@ -51,8 +49,6 @@ function App() {
    getApplist();
   }, []);
 
- 
-
   return (
     <BrowserRouter>
       <div className={font.font}>
@@ -62,24 +58,22 @@ function App() {
             path="/"
             element={
               <>
-                <div className="max-w-[90%] mx-auto">
-                  <div className='z-49 pt-[9vw] w-[100%] fixed left-1/2 transform -translate-x-1/2' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 87%, rgba(0,78,123,0) 100%)` }}>
-                    <h1
-                      className="text-white font-bold text-center mt-[2vw] mb-[4vw] underline"
-                      style={{ fontSize: "1.9vw" }}
-                    >
-                      SteamDream
-                    </h1>
-                  </div>
-                
-                <div className="pt-[15vw] space-y-12">
-                  
+                <div className='z-49 pt-[9vw] w-[90vw] fixed left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 87%, rgba(0,78,123,0) 100%)` }}>
+                  <h1
+                    className="text-white font-bold text-center mt-[2vw] mb-[4vw] underline"
+                    style={{ fontSize: "1.9vw" }}
+                  >
+                    SteamDream
+                  </h1>
                 </div>
-
-              </div>
-            </>
-          }
-        />
+                <div className="max-w-[90%] mx-auto">
+                  <div className="pt-[15vw] space-y-12">
+                    
+                  </div>
+                </div>
+              </>
+            }
+          />
         <Route path="/profile" element={<Profile colors={colors} swapColors={swapColors} swapFont={swapFont} />} />
         <Route path="/login" element={<Login />} /> 
         <Route path="/favorite" element={<Favorite colors={colors} />} />

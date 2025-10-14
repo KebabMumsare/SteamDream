@@ -17,7 +17,7 @@ const mobilePlaceholderStyle = `
 `;
 
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import { useState } from "react";
 import HamburgerMenu from "./HamburgerMenu";
 
 interface NavbarProps {
@@ -46,7 +46,7 @@ function Navbar({ colors }: NavbarProps) {
         onClick={() => navigate("/")}
       >
         <img
-          src="/src/assets/Icons/Logo.png"
+          src="/assets/Icons/Logo.png"
           alt="Logo"
           className="object-contain"
           style={{ width: '7vw', height: '3vw', minWidth: '40px', minHeight: '24px' }}
@@ -57,7 +57,7 @@ function Navbar({ colors }: NavbarProps) {
           className="relative w-[36vw] max-[450px]:w-[60vw]"
         >
           <img
-            src="/src/assets/Icons/Search.gif"
+            src="/assets/Icons/Search.gif"
             alt="Search"
             className="absolute max-[450px]:hidden"
             style={{
@@ -67,7 +67,7 @@ function Navbar({ colors }: NavbarProps) {
               width: "2vw",
               height: "2vw",
             }}
-            onMouseOver={e => { e.currentTarget.src = `/src/assets/Icons/Search.gif?${Date.now()}`; }}
+            onMouseOver={e => { e.currentTarget.src = `/assets/Icons/Search.gif?${Date.now()}`; }}
           />
           <input
             type="text"
@@ -103,10 +103,10 @@ function Navbar({ colors }: NavbarProps) {
             onClick={() => navigate("/favorite")}
           >
             <img 
-              src="/src/assets/Icons/Bookmark.gif" 
+              src="/assets/Icons/Bookmark.gif" 
               alt="Bookmark" 
               style={{ width: "2vw", height: "2vw"}}
-              onMouseOver={e => { e.currentTarget.src = `/src/assets/Icons/Bookmark.gif?${Date.now()}`; }}
+              onMouseOver={e => { e.currentTarget.src = `/assets/Icons/Bookmark.gif?${Date.now()}`; }}
             />
           </div>
         </li>
@@ -124,10 +124,10 @@ function Navbar({ colors }: NavbarProps) {
             onClick={() => navigate("/Profile")}
           >
             <img 
-              src="/src/assets/Icons/Profile.gif" 
+              src="/assets/Icons/Profile.gif" 
               alt="Profile" 
               style={{ width: "2.2vw", height: "2.2vw" }}
-              onMouseOver={e => { e.currentTarget.src = `/src/assets/Icons/Profile.gif?${Date.now()}`; }}
+              onMouseOver={e => { e.currentTarget.src = `/assets/Icons/Profile.gif?${Date.now()}`; }}
             />
           </div>
         </li>

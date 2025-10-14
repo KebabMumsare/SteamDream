@@ -68,7 +68,7 @@ function Login() {
           <a href="/auth/steam">
             <div className="border-2 border-[#FFFFFF] rounded-full p-2 bg-transparent flex items-center justify-center">
               <img
-                src="/src/assets/Icons/SteamLogin.png"
+                src="/assets/Icons/SteamLogin.png"
                 alt="Login with Steam"
                 className="steam-icon rounded-full"
               />
