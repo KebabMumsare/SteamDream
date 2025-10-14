@@ -79,7 +79,7 @@ function Card() {
       <div className="relative font-mono text-white/90 bg-[#66C0F4] backdrop-blur-sm border border-white/10 rounded-lg p-3.5 md:p-4 text-[11px] md:text-xs leading-relaxed shadow-inner shadow-black/40 max-h-[320px] overflow-auto scrollbar-thin scrollbar-thumb-[#66C0F4]/25 scrollbar-track-transparent">
         <div className="absolute inset-0 pointer-events-none rounded-lg bg-[#66C0F4]/5" />
         <p className="relative z-10">
-          hbvhfbv tert brtb rb rb r b rb ry brbrbr br br ry bry bry ry b rb r ybn r nrf yb r nr n ry nr n ryh br6 h r6 ry bry r nr h r nr nr n r nr n hbvhfbv tert brtb rb rb r b rb ry brbrbr br br ry bry bry ry b rb r ybn r nrf yb r nr n ry nr n ryh br6 h r6 ry bry r nr h r nr nr n r nr n
+          Payday 3 är ett förstapersonsskjutspel med starkt fokus på samarbete och strategi, där du tillsammans med upp till tre andra spelare utför avancerade rån. Spelet är en direkt uppföljare till Payday 2 och fortsätter berättelsen om det ökända Payday-gänget, som efter att ha försökt lämna det kriminella livet tvingas tillbaka in i brottets värld. Handlingen utspelar sig i en modern miljö, främst i New York, där nya säkerhetssystem, övervakning och teknologi spelar en större roll än i tidigare delar.
         </p>
       </div>
     </div>
