@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
-import Database from 'better-sqlite3';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as SteamStrategy } from 'passport-steam';
@@ -60,37 +59,6 @@ passport.use(new SteamStrategy(
 passport.serializeUser((user: any, done) => done(null, user));
 passport.deserializeUser((obj: any, done) => done(null, obj));
 
-// Initialize SQLite database
-const db = new Database('./SteamDream.db');
-
-// Create tables if they don't exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS games (
-    appid INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    price TEXT,
-    discount INTEGER DEFAULT 0,
-    header_image TEXT,
-    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
-    needs_update INTEGER DEFAULT 1  -- Flag for games needing updates
-  );
-
-  CREATE TABLE IF NOT EXISTS app_list (
-    appid INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS metadata (
-    key TEXT PRIMARY KEY,
-    value TEXT,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_games_discount ON games(discount DESC);
-  CREATE INDEX IF NOT EXISTS idx_games_needs_update ON games(needs_update);
-  CREATE INDEX IF NOT EXISTS idx_app_list_name ON app_list(name);
-`);
-
 // Auth Routes
 app.get('/auth/steam', passport.authenticate('steam'));
 
@@ -123,6 +91,61 @@ app.get('/api/status', (req, res) => res.json({ status: 'Backend running' }));
 app.get('/dashboard', (req, res) => {
   if (!req.isAuthenticated()) return res.redirect('/auth/steam');
   res.send(`Welcome, ${(req.user as any).displayName}`);
+});
+
+// Get scraper statistics
+app.get('/api/scraper/stats', (req, res) => {
+  try {
+    const stats = {
+      total: db.prepare('SELECT COUNT(*) as count FROM steam_apps').get() as { count: number },
+      pending: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'pending'").get() as { count: number },
+      games: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'game'").get() as { count: number },
+      notGames: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status IN ('not_game', 'checked')").get() as { count: number },
+      failed: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'failed'").get() as { count: number }
+    };
+
+    const processed = stats.total.count - stats.pending.count;
+    const progress = stats.total.count > 0 ? ((processed / stats.total.count) * 100).toFixed(2) : '0.00';
+
+    res.json({ ...stats, progress: parseFloat(progress) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+// Get recent games
+app.get('/api/scraper/recent-games', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const games = db.prepare(`
+      SELECT appid, name, type 
+      FROM steam_games 
+      ORDER BY appid DESC 
+      LIMIT ?
+    `).all(limit);
+
+    res.json(games);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch recent games' });
+  }
+});
+
+// Get game details
+app.get('/api/scraper/game/:appid', (req, res) => {
+  try {
+    const appid = parseInt(req.params.appid);
+    const game = db.prepare('SELECT * FROM steam_games WHERE appid = ?').get(appid) as any;
+
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Parse the JSON data
+    game.extra_data = JSON.parse(game.extra_data);
+    res.json(game);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch game details' });
+  }
 });
 
 // Serve React app for all other routes (must be last!)
