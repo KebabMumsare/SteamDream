@@ -1,13 +1,9 @@
 import testbild from '../assets/testbild.jpg';
 
 function game() {
-  function steamsite() {
-    window.open("https://store.steampowered.com/app/1272080/PAYDAY_3/", "_blank");
-  }
-
+ 
   return (
     <div
-      onClick={steamsite}
       className="cursor-pointer hover:scale-[1.01] transition-transform mt-4 w-full max-w-[95%] sm:max-w-[90%] md:max-w-[85%] min-[1000px]:max-w-[1000px] mx-auto bg-[#1B2838] rounded-[16px] p-3 md:p-4 flex flex-col md:flex-row gap-3 md:gap-4"
     >
       {/* Image - shows at top on mobile/tablet, left on desktop < 1000px */}

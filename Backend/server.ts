@@ -142,4 +142,35 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
+async function fetchSteamAPI(url: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Steam API error: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Steam API fetch error:', error);
+    throw error;
+  }
+}
+
+app.get('/api/steam/owned-games', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const steamId = (req.user as any).id;
+  const apiKey = process.env.STEAM_API_KEY;
+  
+  try {
+    const url = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${apiKey}&steamid=${steamId}&format=json&include_appinfo=true&include_played_free_games=true`;
+    const data = await fetchSteamAPI(url);
+    res.json(data.response);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch owned games' });
+  }
+});
+
+
 export default app;
