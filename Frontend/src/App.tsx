@@ -6,9 +6,7 @@ import Navbar from './components/Navbar';
 import Profile from './Profile';
 import Login from './Login';
 import Favorite from './Favorite';
-import Game from './components/game';
 import { useEffect, useState } from 'react';
-import { getApplist } from './service/steamApi';
 
 function App() {
   const [colors, setColors] = useState({
@@ -43,8 +41,9 @@ function App() {
     setFont({font: randomfonts});
   };
 
+  // Removed getApplist call – endpoint does not exist on backend and caused JSON parse errors
   useEffect(() => {
-    getApplist();
+    // no-op
   }, []);
 
   return (
@@ -67,7 +66,6 @@ function App() {
                 </div>
                 <div className="pt-[15vw] space-y-12">
                   <Card />
-                  <Game />
                   <Card />
                   <Card />
                   <Card />
@@ -80,7 +78,6 @@ function App() {
         <Route path="/profile" element={<Profile colors={colors} swapColors={swapColors} swapFont={swapFont} />} />
         <Route path="/login" element={<Login />} /> 
         <Route path="/favorite" element={<Favorite colors={colors} />} />
-        <Route path="/game" element={<Game />} />
       </Routes>
       </div>
     </BrowserRouter>

@@ -93,78 +93,7 @@ app.get('/dashboard', (req, res) => {
   res.send(`Welcome, ${(req.user as any).displayName}`);
 });
 
-// Get scraper statistics
-app.get('/api/scraper/stats', (req, res) => {
-  try {
-    const stats = {
-      total: db.prepare('SELECT COUNT(*) as count FROM steam_apps').get() as { count: number },
-      pending: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'pending'").get() as { count: number },
-      games: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'game'").get() as { count: number },
-      notGames: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status IN ('not_game', 'checked')").get() as { count: number },
-      failed: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'failed'").get() as { count: number }
-    };
-
-    const processed = stats.total.count - stats.pending.count;
-    const progress = stats.total.count > 0 ? ((processed / stats.total.count) * 100).toFixed(2) : '0.00';
-
-    res.json({ ...stats, progress: parseFloat(progress) });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch stats' });
-  }
-});
-
-// Get recent games
-app.get('/api/scraper/recent-games', (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit as string) || 20;
-    const games = db.prepare(`
-      SELECT appid, name, type 
-      FROM steam_games 
-      ORDER BY appid DESC 
-      LIMIT ?
-    `).all(limit);
-
-    res.json(games);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch recent games' });
-  }
-});
-
-// Get game details
-app.get('/api/scraper/game/:appid', (req, res) => {
-  try {
-    const appid = parseInt(req.params.appid);
-    const game = db.prepare('SELECT * FROM steam_games WHERE appid = ?').get(appid) as any;
-
-    if (!game) {
-      return res.status(404).json({ error: 'Game not found' });
-    }
-
-    // Parse the JSON data
-    game.extra_data = JSON.parse(game.extra_data);
-    res.json(game);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch game details' });
-  }
-});
-
-// Serve React app for all other routes (must be last!)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
-});
-
-const PORT = process.env.PORT ?? 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`🌐 Public URL: ${process.env.BASE_URL}`);
-});
-
-// Graceful shutdown
-process.on('SIGINT', () => {
-  db.close();
-  process.exit(0);
-});
-
+// Steam API helper function
 async function fetchSteamAPI(url: string) {
   try {
     const response = await fetch(url);
@@ -178,6 +107,7 @@ async function fetchSteamAPI(url: string) {
   }
 }
 
+// Steam API Routes - MUST be BEFORE the catch-all route
 app.get('/api/steam/owned-games', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -195,5 +125,76 @@ app.get('/api/steam/owned-games', async (req, res) => {
   }
 });
 
+// Get scraper statistics
+/*app.get('/api/scraper/stats', (req, res) => {
+  try {
+    const stats = {
+      total: db.prepare('SELECT COUNT(*) as count FROM steam_apps').get() as { count: number },
+      pending: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'pending'").get() as { count: number },
+      games: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'game'").get() as { count: number },
+      notGames: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status IN ('not_game', 'checked')").get() as { count: number },
+      failed: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'failed'").get() as { count: number }
+    };
+
+    const processed = stats.total.count - stats.pending.count;
+    const progress = stats.total.count > 0 ? ((processed / stats.total.count) * 100).toFixed(2) : '0.00';
+
+    res.json({ ...stats, progress: parseFloat(progress) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});*/
+
+// Get recent games
+/*app.get('/api/scraper/recent-games', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const games = db.prepare(`
+      SELECT appid, name, type 
+      FROM steam_games 
+      ORDER BY appid DESC 
+      LIMIT ?
+    `).all(limit);
+
+    res.json(games);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch recent games' });
+  }
+}); */
+
+// Get game details
+/*app.get('/api/scraper/game/:appid', (req, res) => {
+  try {
+    const appid = parseInt(req.params.appid);
+    const game = db.prepare('SELECT * FROM steam_games WHERE appid = ?').get(appid) as any;
+
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Parse the JSON data
+    game.extra_data = JSON.parse(game.extra_data);
+    res.json(game);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch game details' });
+  }
+});*/
+
+// Serve React app for all other routes (must be last!)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
+});
+
+const PORT = process.env.PORT ?? 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`🌐 Public URL: ${process.env.BASE_URL}`);
+});
+
+// Graceful shutdown
+/*process.on('SIGINT', () => {
+  db.close();
+  process.exit(0);
+});*/
 
 export default app;

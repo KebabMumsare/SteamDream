@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Game from './components/game';
+import { getOwnedGames, getSteamLoginUrl } from './service/steamApi';
 
 
 interface ProfileProps {
@@ -16,9 +17,49 @@ interface ProfileProps {
     swapColors: () => void;
     swapFont: () => void;
 }
+interface OwnedGame {
+  appid: number;
+  name: string;
+  playtime_forever: number;
+  img_icon_url?: string;
+  img_logo_url?: string;
+  rtime_last_played?: number;
+  has_community_visible_stats?: boolean;
+}
 
 function Profile({ colors, swapColors, swapFont }: ProfileProps) {
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [games, setGames] = useState<OwnedGame[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function fetchGames() {
+            try {
+                setLoading(true);
+                const data = await getOwnedGames();
+                setGames(data.games || []);
+                setError(null); // Clear any previous errors
+            } catch (err: any) {
+                console.error('Failed to fetch owned games:', err);
+                
+                // If 401 Unauthorized, user needs to login
+                if (err.message?.includes('401')) {
+                    setError('Please login with Steam to view your games.');
+                    setLoading(false);
+                    return;
+                }
+                
+                setError('Failed to load your games. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchGames();
+    }, []);
+
+
 
     return (
         <>
@@ -84,13 +125,53 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                         </div>
                     </div>
               <div className='p-4 space-y-4 max-w-[90%] mx-auto pb-8'>
-                       <Game />
-                       <Game />
-                       <Game />
-                       <Game />
-                       <Game />  
-                       <Game />
+                    {/* Loading state */}
+                        {loading && (
+                            <div className="text-center py-12">
+                                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
+                                <p className="text-white/70 mt-4">Loading your games...</p>
+                            </div>
+                        )}
 
+                        {/* Error state */}
+                        {error && (
+                            <div className="text-center py-12">
+                                <p className="text-red-400 mb-4">{error}</p>
+                                <a 
+                                    href={getSteamLoginUrl()}
+                                    className="inline-block bg-[#66C0F4] hover:bg-[#2979A8] text-white font-bold py-3 px-6 rounded-lg transition"
+                                >
+                                    Login with Steam
+                                </a>
+                            </div>
+                        )}
+
+                        {/* Empty state */}
+                        {!loading && !error && games.length === 0 && (
+                            <div className="text-center py-12">
+                                <p className="text-white/70">No games found in your library.</p>
+                            </div>
+                        )}
+
+                        {/* Games list - Loop through each game and pass as props */}
+                        {!loading && !error && games.length > 0 && (
+                            <>
+                             <p className="text-white/70 text-center mb-4">
+                                    You own {games.length} game{games.length !== 1 ? 's' : ''}
+                                </p>
+                                {games.map((game) => (
+                            <Game
+                                        key={game.appid}
+                                        appid={game.appid}
+                                        name={game.name}
+                                        playtime_forever={game.playtime_forever}
+                                        img_icon_url={game.img_icon_url}
+                                        img_logo_url={game.img_logo_url}
+                                        rtime_last_played={game.rtime_last_played}
+                                        has_community_visible_stats={game.has_community_visible_stats}/>
+                                ))}
+                            </>
+                         )}
                     </div>
                 </section>
 
