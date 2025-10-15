@@ -14,6 +14,66 @@ const USER_AGENTS = [
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
 ];
 
+// Keywords that typically indicate non-games
+const NON_GAME_KEYWORDS = [
+  // Demos and trials
+  'demo', 'trial', 'test', 'preview', 'beta', 'alpha',
+  
+  // Trailers and media
+  'trailer', 'video', 'movie', 'cinematic', 'cutscene',
+  
+  // DLC and expansions
+  'dlc', 'expansion', 'addon', 'pack', 'bundle',
+  
+  // Software and tools
+  'editor', 'creator', 'tool', 'sdk', 'kit', 'mod',
+  
+  // Content types
+  'soundtrack', 'ost', 'music', 'artbook', 'guide', 'manual',
+  
+  // Platform/tech
+  'steam', 'workshop', 'source', 'unity', 'unreal',
+  
+  // Status indicators
+  'removed', 'delisted', 'discontinued', 'obsolete',
+  
+  // Common patterns
+  'test_', '_test', '_demo', '_trailer', '_dlc'
+];
+
+// Check if app name suggests it's not a game
+function isLikelyNonGame(appName: string): boolean {
+  const name = appName.toLowerCase();
+  
+  // Check for exact keyword matches
+  for (const keyword of NON_GAME_KEYWORDS) {
+    if (name.includes(keyword)) {
+      return true;
+    }
+  }
+  
+  // Check for patterns that suggest non-games
+  const patterns = [
+    /demo$/i,           // ends with "demo"
+    /trailer$/i,        // ends with "trailer"
+    /dlc$/i,            // ends with "dlc"
+    /soundtrack$/i,     // ends with "soundtrack"
+    /^test/i,           // starts with "test"
+    /^steam/i,          // starts with "steam"
+    /\s+demo\s+/i,      // contains " demo "
+    /\s+trailer\s+/i,   // contains " trailer "
+    /\s+dlc\s+/i,       // contains " dlc "
+  ];
+  
+  for (const pattern of patterns) {
+    if (pattern.test(name)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 // Database setup
 const db = new Database('./SteamDream.db');
 
@@ -137,6 +197,19 @@ function sleep(ms: number) {
 
 // Process a single app
 async function processApp(appid: number, name: string): Promise<boolean> {
+  // Quick filter: skip obvious non-games based on name
+  if (isLikelyNonGame(name)) {
+    const updateStmt = db.prepare(`
+      UPDATE steam_apps 
+      SET status = 'not_game', last_checked = CURRENT_TIMESTAMP 
+      WHERE appid = ?
+    `);
+    updateStmt.run(appid);
+    console.log(`[${timestamp()}] AppID ${appid} (${name}) → 🚫 SKIPPED (name filter)`);
+    return true;
+  }
+
+  // Only make API call for apps that pass the name filter
   const result = await fetchAppDetails(appid);
 
   const updateStmt = db.prepare(`
@@ -243,7 +316,8 @@ function printStats() {
     pending: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'pending'").get() as { count: number },
     games: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'game'").get() as { count: number },
     notGames: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status IN ('not_game', 'checked')").get() as { count: number },
-    failed: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'failed'").get() as { count: number }
+    failed: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'failed'").get() as { count: number },
+    skipped: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'not_game' AND last_checked IS NOT NULL").get() as { count: number }
   };
 
   console.log('\n========================================');
@@ -252,6 +326,7 @@ function printStats() {
   console.log(`Total apps:      ${stats.total.count.toLocaleString()}`);
   console.log(`✅ Games found:  ${stats.games.count.toLocaleString()}`);
   console.log(`❌ Not games:    ${stats.notGames.count.toLocaleString()}`);
+  console.log(`🚫 Name filtered: ${stats.skipped.count.toLocaleString()}`);
   console.log(`⏳ Pending:      ${stats.pending.count.toLocaleString()}`);
   console.log(`⚠️  Failed:       ${stats.failed.count.toLocaleString()}`);
   
@@ -291,7 +366,8 @@ async function main() {
 
   const options = {
     shuffle: args.includes('--shuffle'),
-    retryFailed: args.includes('--retry-failed')
+    retryFailed: args.includes('--retry-failed'),
+    conservative: args.includes('--conservative') // New flag
   };
 
   if (args.includes('--resume') || args.length === 0) {
@@ -305,6 +381,7 @@ async function main() {
     console.log('  npm run scrape --stats      # Show statistics only');
     console.log('  npm run scrape --shuffle    # Process apps in random order');
     console.log('  npm run scrape --retry-failed  # Also retry failed apps');
+    console.log('  npm run scrape --conservative  # Disable name filtering (more conservative scraping)');
   }
 }
 
