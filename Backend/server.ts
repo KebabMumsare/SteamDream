@@ -16,6 +16,10 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
+
+// Trust proxy for ngrok
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: true,
   credentials: true
@@ -25,15 +29,19 @@ app.use(express.json());
 // Serve static files from Frontend/dist
 app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 
-// Session configuration
+// Session configuration - CRITICAL for passport-steam with ngrok
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'defaultsecret',
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'your-super-secret-key',
+    name: 'sessionId',
+    resave: true, // MUST be true for passport-steam
+    saveUninitialized: true, // MUST be true for passport-steam
     cookie: {
-      secure: false, // set to true if using https
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      secure: false, // MUST be false for ngrok (even though it's https, it's proxied)
+      httpOnly: true,
+      sameSite: 'lax', // Important for OAuth redirects
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/'
     }
   })
 );
@@ -41,6 +49,19 @@ app.use(
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Debug middleware - log all requests
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
+    console.log(`\n📍 ${req.method} ${req.path}`);
+    console.log(`   Session ID: ${req.sessionID}`);
+    console.log(`   Authenticated: ${req.isAuthenticated()}`);
+    if (req.user) {
+      console.log(`   ✅ User logged in - Steam ID: ${(req.user as any).id}`);
+    }
+  }
+  next();
+});
 
 // Configure Steam Strategy
 passport.use(new SteamStrategy(
@@ -67,14 +88,28 @@ app.get(
   passport.authenticate('steam', { failureRedirect: '/' }),
   (req, res) => {
     // Successful login - redirect to profile page
+    const user = req.user as any;
+    console.log('\n✅ ===== STEAM LOGIN SUCCESSFUL =====');
+    console.log('Steam ID:', user.id);
+    console.log('Display Name:', user.displayName);
+    console.log('Full User Object:', JSON.stringify(user, null, 2));
+    console.log('Session ID:', req.sessionID);
+    console.log('=====================================\n');
     res.redirect('/profile');
   }
 );
 
 app.get('/auth/user', (req, res) => {
+  console.log('\n🔍 /auth/user called');
+  console.log('Is Authenticated:', req.isAuthenticated());
+  
   if (req.isAuthenticated()) {
+    const user = req.user as any;
+    console.log('✅ User Steam ID:', user.id);
+    console.log('Display Name:', user.displayName);
     res.json(req.user);
   } else {
+    console.log('❌ Not authenticated');
     res.status(401).json({ error: 'Not authenticated' });
   }
 });
@@ -109,18 +144,49 @@ async function fetchSteamAPI(url: string) {
 
 // Steam API Routes - MUST be BEFORE the catch-all route
 app.get('/api/steam/owned-games', async (req, res) => {
+  console.log('\n📥 ===== FETCHING OWNED GAMES =====');
+  console.log('Is Authenticated:', req.isAuthenticated());
+  console.log('Session ID:', req.sessionID);
+  
   if (!req.isAuthenticated()) {
+    console.log('❌ User NOT authenticated');
+    console.log('==================================\n');
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  const steamId = (req.user as any).id;
+  const user = req.user as any;
+  // passport-steam stores the Steam ID in profile.id
+  const steamId = user.id || user.steamid || user.steamId || user._json?.steamid;
+  
+  console.log('✅ User IS authenticated');
+  console.log('User object keys:', Object.keys(user));
+  console.log('Steam ID (user.id):', user.id);
+  console.log('Steam ID (user.steamid):', user.steamid);
+  console.log('Steam ID (user._json?.steamid):', user._json?.steamid);
+  console.log('Using Steam ID:', steamId);
+  
+  if (!steamId) {
+    console.log('❌ No Steam ID found in user object!');
+    console.log('Full user object:', JSON.stringify(user, null, 2));
+    console.log('==================================\n');
+    return res.status(500).json({ error: 'Steam ID not found' });
+  }
+  
   const apiKey = process.env.STEAM_API_KEY;
   
   try {
     const url = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${apiKey}&steamid=${steamId}&format=json&include_appinfo=true&include_played_free_games=true`;
+    console.log('🌐 Calling Steam API for Steam ID:', steamId);
+    
     const data = await fetchSteamAPI(url);
+    const gameCount = data.response?.game_count || 0;
+    
+    console.log(`✅ SUCCESS! Fetched ${gameCount} games`);
+    console.log('==================================\n');
     res.json(data.response);
   } catch (error) {
+    console.error('❌ ERROR fetching games:', error);
+    console.log('==================================\n');
     res.status(500).json({ error: 'Failed to fetch owned games' });
   }
 });

@@ -19,6 +19,7 @@ const mobilePlaceholderStyle = `
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import HamburgerMenu from "./HamburgerMenu";
+import { checkAuth } from "../service/steamApi";
 
 interface NavbarProps {
   colors: {
@@ -32,6 +33,16 @@ function Navbar({ colors }: NavbarProps) {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleProfileClick = async () => {
+    const isAuthenticated = await checkAuth();
+    if (isAuthenticated) {
+      navigate("/profile");
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <>
       <style>{mobilePlaceholderStyle}</style>
@@ -121,7 +132,7 @@ function Navbar({ colors }: NavbarProps) {
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
-            onClick={() => navigate("/Profile")}
+            onClick={handleProfileClick}
           >
             <img 
               src="/assets/Icons/Profile.gif" 
