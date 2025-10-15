@@ -162,7 +162,7 @@ async function fetchAppDetails(appid: number, retryCount = 0): Promise<any> {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     const response = await fetch(url, { 
       headers,
@@ -176,7 +176,16 @@ async function fetchAppDetails(appid: number, retryCount = 0): Promise<any> {
     }
 
     const data = await response.json();
-    return data[appid] || { success: false };
+    const appData = data[appid];
+    
+    // Better handling of missing app data
+    if (!appData) {
+      return { success: false, error: 'App data not found in API response' };
+    }
+    
+    // Return the actual Steam API response structure
+    return appData;
+    
   } catch (error: any) {
     // Exponential backoff for network errors
     if (retryCount < 3) {
@@ -219,12 +228,20 @@ async function processApp(appid: number, name: string): Promise<boolean> {
   `);
 
   if (!result.success) {
-    updateStmt.run('failed', appid);
-    console.log(`[${timestamp()}] AppID ${appid} (${name}) → failed (${result.error || 'unknown error'})`);
-    return false;
+    // Check if it's a Steam API error vs network error
+    if (result.error && result.error.startsWith('HTTP')) {
+      // Network/HTTP error - retry later
+      console.log(`[${timestamp()}] AppID ${appid} (${name}) → HTTP error: ${result.error} - will retry`);
+      return false;
+    } else {
+      // Steam API says app doesn't exist or is private
+      updateStmt.run('not_game', appid);
+      console.log(`[${timestamp()}] AppID ${appid} (${name}) → not found/private`);
+      return true;
+    }
   }
 
-  const appData = result.data;
+  const appData = result;
   
   if (appData.type === 'game') {
     // Insert into steam_games
