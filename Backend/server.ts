@@ -255,6 +255,68 @@ app.get('/api/scraper/game/:appid', (req, res) => {
   }
 });
 
+// Get all games with specific fields (name, price, discount, etc.)
+app.get('/api/games', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 100;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const games = db.prepare(`
+      SELECT 
+        appid,
+        name,
+        type,
+        extra_data
+      FROM steam_games 
+      ORDER BY appid DESC
+      LIMIT ? OFFSET ?
+    `).all(limit, offset) as any[];
+
+    // Parse extra_data JSON for each game and extract relevant fields
+    const parsedGames = games.map(game => {
+      let gameData: any = {
+        appid: game.appid,
+        name: game.name,
+        type: game.type
+      };
+
+      try {
+        if (game.extra_data && typeof game.extra_data === 'string') {
+          const extraData = JSON.parse(game.extra_data);
+          
+          // Extract price information
+          if (extraData.price_overview) {
+            gameData.price_before_discount = extraData.price_overview.initial / 100; // Convert cents to dollars
+            gameData.price_after_discount = extraData.price_overview.final / 100;
+            gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0; // Free game
+            gameData.discount_percent = 0;
+          }
+          
+          // Extract other fields
+          gameData.image_url = extraData.capsule_image || extraData.header_image || '';
+          gameData.platforms = extraData.platforms || {};
+          gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
+          gameData.description = extraData.short_description || extraData.detailed_description || '';
+        }
+      } catch (e) {
+        console.error(`Error parsing game ${game.appid}:`, e);
+      }
+      
+      return gameData;
+    });
+
+    res.json({
+      count: parsedGames.length,
+      games: parsedGames
+    });
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    res.status(500).json({ error: 'Failed to fetch games' });
+  }
+});
+
 // Serve React app for all other routes (must be last!)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));

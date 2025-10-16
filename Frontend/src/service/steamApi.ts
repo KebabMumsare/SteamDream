@@ -43,10 +43,18 @@ export async function getOwnedGames() {
   return fetchAPI('/owned-games');
 }
 
-// Get player profile summary (name, avatar, level, etc.)
-export async function getPlayerSummary() {
-  console.log('👤 getPlayerSummary() called');
-  return fetchAPI('/player-summary');
+// Get all games from database
+export async function getAllGames(limit = 100, offset = 0) {
+  console.log('🎮 getAllGames() called');
+  const response = await fetch(`${BACKEND_BASE}/api/games?limit=${limit}&offset=${offset}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch games: ${response.status}`);
+  }
+  
+  return response.json();
 }
 
 // Check if user is authenticated

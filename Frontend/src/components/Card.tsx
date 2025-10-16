@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import type { MouseEvent } from 'react';
-import testbild from '../assets/testbild.jpg';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
 import star from '../assets/Icons/star.png';
@@ -64,7 +63,7 @@ function Card({
     >
       {/* Image */}
       <div className="relative aspect-[16/10] rounded-[1.4vw] overflow-hidden bg-black/30">
-        <img src={imageUrl || testbild} alt={`${title} artwork`} className="w-full h-full object-cover" />
+        <img src={imageUrl} alt={`${title} artwork`} className="w-full h-full object-cover" />
       </div>
 
       {/* Main content */}

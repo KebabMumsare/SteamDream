@@ -7,9 +7,24 @@ import Profile from './Profile';
 import Login from './Login';
 import Favorite from './Favorite';
 import { useEffect, useState } from 'react';
+import { getAllGames } from './service/steamApi';
+
+interface Game {
+  appid: number;
+  name: string;
+  price_before_discount?: number;
+  price_after_discount?: number;
+  discount_percent?: number;
+  image_url?: string;
+  platforms?: any;
+  tags?: string[];
+  description?: string;
+}
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [games, setGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const [colors, setColors] = useState({
     background: '#1B2838',
@@ -43,9 +58,24 @@ function App() {
     setFont({font: randomfonts});
   };
 
-  // Removed getApplist call – endpoint does not exist on backend and caused JSON parse errors
+  // Fetch games from database
   useEffect(() => {
-    // no-op
+    async function fetchGames() {
+      try {
+        console.log('🎮 Fetching games from database...');
+        setLoading(true);
+        const data = await getAllGames(100, 0);
+        console.log('✅ Games fetched:', data);
+        setGames(data.games || []);
+      } catch (error) {
+        console.error('❌ Failed to fetch games:', error);
+        setGames([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchGames();
   }, []);
 
   return (
@@ -67,57 +97,36 @@ function App() {
                   </h1>
                 </div>
                 <div className="pt-[18vw] space-y-12">
-                  {[
-                    {
-                      title: "PAYDAY 3",
-                      genre: "Strategy & Action",
-                      originalPrice: 19.99,
-                      currentPrice: 10.00,
-                      discountPercent: 50,
-                      platforms: { windows: true, apple: true },
-                      tags: ['Co-op', 'FPS', 'Online'],
-                      description: "Payday 3 är ett förstapersonsskjutspel med starkt fokus på samarbete och strategi, där du tillsammans med upp till tre andra spelare utför avancerade rån. Spelet är en direkt uppföljare till Payday 2 och fortsätter berättelsen om det ökända Payday-gänget, som efter att ha försökt lämna det kriminella livet tvingas tillbaka in i brottets värld. Handlingen utspelar sig i en modern miljö, främst i New York, där nya säkerhetssystem, övervakning och teknologi spelar en större roll än i tidigare delar.",
-                      steamUrl: "https://store.steampowered.com/app/1272080/PAYDAY_3/"
-                    },
-                    {
-                      title: "Counter-Strike 2",
-                      genre: "FPS & Competitive",
-                      currentPrice: 0,
-                      platforms: { windows: true },
-                      tags: ['Multiplayer', 'Shooter', 'Tactical'],
-                      description: "Counter-Strike 2 är nästa generation av världens mest populära taktiska skjutspel. Med helt nytt grafiksystem, förbättrad fysik och uppdaterad gameplay tar CS2 serien till nya höjder.",
-                      steamUrl: "https://store.steampowered.com/app/730/CounterStrike_2/"
-                    },
-                    {
-                      title: "Cyberpunk 2077",
-                      genre: "RPG & Action",
-                      originalPrice: 59.99,
-                      currentPrice: 29.99,
-                      discountPercent: 50,
-                      platforms: { windows: true },
-                      tags: ['Sci-fi', 'Open World', 'Cyberpunk'],
-                      description: "Cyberpunk 2077 är ett actionrollspel i öppen värld som utspelar sig i Night City - en megalopolis full av makt, glamour och kroppsmodifikationer. Du spelar som V, en cyberpunk som jagar efter ett unikt implantat som är nyckeln till odödlighet.",
-                      steamUrl: "https://store.steampowered.com/app/1091500/Cyberpunk_2077/"
-                    }
-                  ]
-                    .filter(game => 
-                      game.title.toLowerCase().startsWith(searchTerm.toLowerCase())
-                    )
-                    .map((game, index) => (
-                      <Card 
-                        key={index}
-                        title={game.title}
-                        genre={game.genre}
-                        originalPrice={game.originalPrice}
-                        currentPrice={game.currentPrice}
-                        discountPercent={game.discountPercent}
-                        platforms={game.platforms}
-                        tags={game.tags}
-                        description={game.description}
-                        steamUrl={game.steamUrl}
-                      />
-                    ))
-                  }
+                  {loading ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
+                      <p className="text-white/70 mt-4">Loading games...</p>
+                    </div>
+                  ) : games.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-white/70">No games found in database.</p>
+                    </div>
+                  ) : (
+                    games
+                      .filter(game => 
+                        game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+                      )
+                      .map((game) => (
+                        <Card 
+                          imageUrl={game.image_url}
+                          key={game.appid}
+                          title={game.name}
+                          genre=""
+                          originalPrice={game.price_before_discount}
+                          currentPrice={game.price_after_discount}
+                          discountPercent={game.discount_percent}
+                          platforms={game.platforms || {}}
+                          tags={game.tags || []}
+                          description={game.description || ''}
+                          steamUrl={`https://store.steampowered.com/app/${game.appid}`}
+                        />
+                      ))
+                  )}
                 </div>
               </div>
             </>
