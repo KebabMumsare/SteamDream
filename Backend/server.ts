@@ -7,6 +7,8 @@ import { Strategy as SteamStrategy } from 'passport-steam';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import Database from 'better-sqlite3';
+
 
 // ES module equivalents for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +16,10 @@ const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
+
+// Initialize SQLite database
+const db = new Database(path.join(__dirname, 'SteamDream.db'));
+console.log('✅ Database connected:', path.join(__dirname, 'SteamDream.db'));
 
 const app = express();
 
@@ -192,27 +198,22 @@ app.get('/api/steam/owned-games', async (req, res) => {
 });
 
 // Get scraper statistics
-/*app.get('/api/scraper/stats', (req, res) => {
+app.get('/api/scraper/stats', (req, res) => {
   try {
     const stats = {
-      total: db.prepare('SELECT COUNT(*) as count FROM steam_apps').get() as { count: number },
-      pending: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'pending'").get() as { count: number },
-      games: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'game'").get() as { count: number },
-      notGames: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status IN ('not_game', 'checked')").get() as { count: number },
-      failed: db.prepare("SELECT COUNT(*) as count FROM steam_apps WHERE status = 'failed'").get() as { count: number }
+      total: db.prepare('SELECT COUNT(*) as count FROM steam_games').get() as { count: number },
+      games: db.prepare('SELECT COUNT(*) as count FROM steam_games').get() as { count: number }
     };
 
-    const processed = stats.total.count - stats.pending.count;
-    const progress = stats.total.count > 0 ? ((processed / stats.total.count) * 100).toFixed(2) : '0.00';
-
-    res.json({ ...stats, progress: parseFloat(progress) });
+    res.json(stats);
   } catch (error) {
+    console.error('Error fetching stats:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
-});*/
+});
 
 // Get recent games
-/*app.get('/api/scraper/recent-games', (req, res) => {
+app.get('/api/scraper/recent-games', (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 20;
     const games = db.prepare(`
@@ -224,12 +225,13 @@ app.get('/api/steam/owned-games', async (req, res) => {
 
     res.json(games);
   } catch (error) {
+    console.error('Error fetching recent games:', error);
     res.status(500).json({ error: 'Failed to fetch recent games' });
   }
-}); */
+});
 
 // Get game details
-/*app.get('/api/scraper/game/:appid', (req, res) => {
+app.get('/api/scraper/game/:appid', (req, res) => {
   try {
     const appid = parseInt(req.params.appid);
     const game = db.prepare('SELECT * FROM steam_games WHERE appid = ?').get(appid) as any;
@@ -238,13 +240,20 @@ app.get('/api/steam/owned-games', async (req, res) => {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    // Parse the JSON data
-    game.extra_data = JSON.parse(game.extra_data);
+    // Parse the JSON data if it exists
+    if (game.extra_data) {
+      try {
+        game.extra_data = JSON.parse(game.extra_data);
+      } catch (e) {
+        console.error('Error parsing extra_data:', e);
+      }
+    }
     res.json(game);
   } catch (error) {
+    console.error('Error fetching game details:', error);
     res.status(500).json({ error: 'Failed to fetch game details' });
   }
-});*/
+});
 
 // Serve React app for all other routes (must be last!)
 app.get('*', (req, res) => {
@@ -258,9 +267,13 @@ app.listen(PORT, () => {
 });
 
 // Graceful shutdown
-/*process.on('SIGINT', () => {
+process.on('SIGINT', () => {
+  console.log('\n🛑 Shutting down gracefully...');
   db.close();
+  console.log('✅ Database connection closed');
   process.exit(0);
-});*/
+});
+
+
 
 export default app;
