@@ -36,6 +36,16 @@ function Card({
   steamUrl
 }: CardProps) {
   const [fav,setFav] = useState(false);
+  
+  // Truncate title to 20 characters
+  const truncatedTitle = title.length > 20
+    ? title.substring(0, 22) + '...'
+    : title;
+  
+  const truncatedDescription = description.length > 290
+    ? description.substring(0, 270) + '...'
+    : description;
+  
   function Favknapp(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     e.preventDefault();
@@ -62,7 +72,7 @@ function Card({
         {/* Title + Favorite */}
         <div className="flex items-center" style={{ gap: '0.6vw' }}>
           <h2 className="bg-[#66C0F4] font-mono font-semibold rounded-[0.8vw] flex items-center w-max text-white shadow-sm" style={{ fontSize: '1.2vw', padding: '0.6vw 1vw', height: '2.8vw' }}>
-            {title}
+            {truncatedTitle}
           </h2>
           <button
             onClick={Favknapp}
@@ -120,7 +130,7 @@ function Card({
       <div className="relative font-mono text-white/90 bg-[#66C0F4] backdrop-blur-sm border border-white/10 rounded-lg leading-relaxed shadow-inner shadow-black/40 overflow-auto scrollbar-thin scrollbar-thumb-[#66C0F4]/25 scrollbar-track-transparent" style={{ padding: '0.8vw', fontSize: '0.75vw', maxHeight: '20vw' }}>
         <div className="absolute inset-0 pointer-events-none rounded-lg bg-[#66C0F4]/5" />
         <p className="relative z-10">
-          {description}
+          {truncatedDescription}
         </p>
       </div>
     </div>
