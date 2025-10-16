@@ -7,7 +7,34 @@ import star from '../assets/Icons/star.png';
 import gul from '../assets/Icons/gul stjärna.png';
 import './Card.css';
 
-function Card() {
+interface CardProps {
+  title: string;
+  imageUrl?: string;
+  originalPrice?: number;
+  currentPrice?: number;
+  discountPercent?: number;
+  genre: string;
+  platforms?: {
+    windows?: boolean;
+    apple?: boolean;
+  };
+  tags?: string[];
+  description: string;
+  steamUrl?: string;
+}
+
+function Card({
+  title,
+  imageUrl,
+  originalPrice,
+  currentPrice,
+  discountPercent,
+  genre,
+  platforms = { windows: true },
+  tags = [],
+  description,
+  steamUrl
+}: CardProps) {
   const [fav,setFav] = useState(false);
   function Favknapp(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
@@ -15,71 +42,85 @@ function Card() {
     setFav(prev => !prev);
   }
     function steamsite() {
-
-        window.open("https://store.steampowered.com/app/1272080/PAYDAY_3/", "_blank");
-        
+        if (steamUrl) {
+          window.open(steamUrl, "_blank");
+        }
     }
   return (
     <div
       onClick={steamsite}
-      className="cursor-pointer hover:scale-[1.01] transition-transform mt-6 w-[85%] mx-auto max-w-[1040px] bg-[#1B2838] rounded-[32px] p-4 md:p-5 grid gap-6 sm:grid-cols-1 md:grid-cols-[270px_1fr] lg:grid-cols-[270px_1fr_320px]"
+      className="cursor-pointer hover:scale-[1.01] transition-transform mt-6 w-[85%] mx-auto max-w-[1600px] bg-[#1B2838] rounded-[1.5vw] grid gap-[1.2vw] sm:grid-cols-1 md:grid-cols-[16vw_1fr] lg:grid-cols-[16vw_1fr_20vw]"
+      style={{ padding: '1vw' }}
     >
       {/* Image */}
-      <div className="relative aspect-[16/10] rounded-[26px] overflow-hidden bg-black/30">
-        <img src={testbild} alt="Game artwork" className="w-full h-full object-cover" />
+      <div className="relative aspect-[16/10] rounded-[1.4vw] overflow-hidden bg-black/30">
+        <img src={imageUrl || testbild} alt={`${title} artwork`} className="w-full h-full object-cover" />
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col" style={{ gap: '0.8vw' }}>
         {/* Title + Favorite */}
-        <div className="flex items-center gap-2.5">
-          <h2 className="bg-[#66C0F4] font-mono font-semibold text-lg md:text-xl rounded-[14px] px-4 h-[46px] flex items-center w-max text-white shadow-sm">
-            PAYDAY 3
+        <div className="flex items-center" style={{ gap: '0.6vw' }}>
+          <h2 className="bg-[#66C0F4] font-mono font-semibold rounded-[0.8vw] flex items-center w-max text-white shadow-sm" style={{ fontSize: '1.2vw', padding: '0.6vw 1vw', height: '2.8vw' }}>
+            {title}
           </h2>
           <button
             onClick={Favknapp}
             aria-pressed={fav}
-            className="inline-flex items-center justify-center p-0 rounded-[14px] hover:scale-105 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66C0F4]/60"
+            className="inline-flex items-center justify-center p-0 rounded-[0.8vw] hover:scale-105 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66C0F4]/60"
           >
             <img
               src={fav ? gul : star}
               alt={fav ? 'Favorited' : 'Add to favorites'}
-              className="bg-[#66C0F4] hover:bg-[#2979A8] h-[46px] w-[48px] rounded-[14px] object-contain drop-shadow-md"
+              className="bg-[#66C0F4] hover:bg-[#2979A8] rounded-[0.8vw] object-contain drop-shadow-md"
+              style={{ height: '2.8vw', width: '2.9vw' }}
             />
           </button>
         </div>
 
         {/* Pricing */}
-        <div className="flex flex-row items-end gap-6">
-          <span className="font-mono line-through text-[11px] md:text-xs opacity-70 tracking-wide">19,99$</span>
-          <span className="font-mono text-lg md:text-xl text-white">10,00$</span>
-          <span className="font-mono bg-[#44CE3F] text-white rounded-md px-2.5 py-1.5 text-[11px] md:text-xs leading-none shadow">
-            -50%
-          </span>
-        </div>
+        {(originalPrice !== undefined || currentPrice !== undefined) && (
+          <div className="flex flex-row items-end" style={{ gap: '1.2vw' }}>
+            {originalPrice !== undefined && discountPercent && (
+              <span className="font-mono line-through opacity-70 tracking-wide" style={{ fontSize: '0.75vw' }}>{originalPrice.toFixed(2)}$</span>
+            )}
+            {currentPrice !== undefined && (
+              <span className="font-mono text-white" style={{ fontSize: '1.3vw' }}>{currentPrice.toFixed(2)}$</span>
+            )}
+            {discountPercent && (
+              <span className="font-mono bg-[#44CE3F] text-white rounded-md leading-none shadow" style={{ padding: '0.4vw 0.6vw', fontSize: '0.75vw' }}>
+                -{discountPercent}%
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Genre + Platforms */}
-        <div className="flex flex-wrap items-center gap-3.5">
-          <div className="inline-flex items-center font-mono text-[9px] md:text-[11px] text-white bg-[#66C0F4] rounded-lg px-2.5 py-1.5 font-semibold w-max shadow">
-            Strategy & Action
+        <div className="flex flex-wrap items-center" style={{ gap: '0.8vw' }}>
+          <div className="inline-flex items-center font-mono text-white bg-[#66C0F4] rounded-lg font-semibold w-max shadow" style={{ fontSize: '0.7vw', padding: '0.4vw 0.6vw' }}>
+            {genre}
           </div>
-          <img src={windows} alt="Windows" className="w-6 h-6 object-contain" />
-          <img src={apple} alt="Apple" className="w-6 h-6 object-contain" />
+          {platforms?.windows && <img src={windows} alt="Windows" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
+          {platforms?.apple && <img src={apple} alt="Apple" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          <span className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">Co-op</span>
-          <span className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">FPS</span>
-          <span className="px-2 py-0.5 rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono text-[9px] md:text-[11px] tracking-wide">Online</span>
-        </div>
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap" style={{ gap: '0.5vw' }}>
+            {tags.map((tag, index) => (
+              <span key={index} className="rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono tracking-wide" style={{ padding: '0.3vw 0.5vw', fontSize: '0.7vw' }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Description panel */}
-      <div className="relative font-mono text-white/90 bg-[#66C0F4] backdrop-blur-sm border border-white/10 rounded-lg p-3.5 md:p-4 text-[11px] md:text-xs leading-relaxed shadow-inner shadow-black/40 max-h-[320px] overflow-auto scrollbar-thin scrollbar-thumb-[#66C0F4]/25 scrollbar-track-transparent">
+      <div className="relative font-mono text-white/90 bg-[#66C0F4] backdrop-blur-sm border border-white/10 rounded-lg leading-relaxed shadow-inner shadow-black/40 overflow-auto scrollbar-thin scrollbar-thumb-[#66C0F4]/25 scrollbar-track-transparent" style={{ padding: '0.8vw', fontSize: '0.75vw', maxHeight: '20vw' }}>
         <div className="absolute inset-0 pointer-events-none rounded-lg bg-[#66C0F4]/5" />
         <p className="relative z-10">
-          Payday 3 är ett förstapersonsskjutspel med starkt fokus på samarbete och strategi, där du tillsammans med upp till tre andra spelare utför avancerade rån. Spelet är en direkt uppföljare till Payday 2 och fortsätter berättelsen om det ökända Payday-gänget, som efter att ha försökt lämna det kriminella livet tvingas tillbaka in i brottets värld. Handlingen utspelar sig i en modern miljö, främst i New York, där nya säkerhetssystem, övervakning och teknologi spelar en större roll än i tidigare delar.
+          {description}
         </p>
       </div>
     </div>
