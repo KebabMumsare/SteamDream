@@ -37,8 +37,8 @@ function Card({
 }: CardProps) {
   const [fav,setFav] = useState(false);
   
-  // Truncate title to 20 characters
-  const truncatedTitle = title.length > 20
+  // Truncate title to 22 characters
+  const truncatedTitle = title.length > 22
     ? title.substring(0, 22) + '...'
     : title;
   

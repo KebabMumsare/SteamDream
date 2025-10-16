@@ -89,8 +89,8 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
                   Favorites
                 </h1>
             </div>
-            <div className="max-w-[90%] mx-auto">
-                <div className="pt-[18vw] space-y-12 pb-8">
+            <div className="max-w-[90%] mx-auto min-h-screen">
+                <div className="pt-[14vw] space-y-12 pb-8 flex flex-col items-start">
                     {filteredGames.map((game, index) => (
                         <Card 
                             key={index}

@@ -57,7 +57,7 @@ function App() {
           path="/"
           element={
             <>
-              <div className="max-w-[90%] mx-auto">
+              <div className="max-w-[90%] mx-auto min-h-screen">
                 <div className='z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
                   <h1
                     className="text-white font-bold text-center underline"
@@ -66,7 +66,7 @@ function App() {
                     SteamDream
                   </h1>
                 </div>
-                <div className="pt-[18vw] space-y-12">
+                <div className="pt-[14vw] space-y-12 flex flex-col items-start">
                   {[
                     {
                       title: "PAYDAY 3",
