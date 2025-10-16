@@ -27,9 +27,11 @@ interface NavbarProps {
     primaryBtn: string;
     primaryBtnHover: string;
   };
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
 }
 
-function Navbar({ colors }: NavbarProps) {
+function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -83,6 +85,8 @@ function Navbar({ colors }: NavbarProps) {
           <input
             type="text"
             placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="searchbar-mobile-placeholder rounded-full text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-[1.3vw] max-[450px]:text-[5vw] placeholder:text-[1.3vw] max-[450px]:placeholder:text-[5vw]"
             style={{
               backgroundColor: colors.primaryBtn,
