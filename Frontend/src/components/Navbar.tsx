@@ -19,6 +19,7 @@ const mobilePlaceholderStyle = `
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import HamburgerMenu from "./HamburgerMenu";
+import { checkAuth } from "../service/steamApi";
 
 interface NavbarProps {
   colors: {
@@ -26,12 +27,24 @@ interface NavbarProps {
     primaryBtn: string;
     primaryBtnHover: string;
   };
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
 }
 
-function Navbar({ colors }: NavbarProps) {
+function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleProfileClick = async () => {
+    const isAuthenticated = await checkAuth();
+    if (isAuthenticated) {
+      navigate("/profile");
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <>
       <style>{mobilePlaceholderStyle}</style>
@@ -72,6 +85,8 @@ function Navbar({ colors }: NavbarProps) {
           <input
             type="text"
             placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="searchbar-mobile-placeholder rounded-full text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-[1.3vw] max-[450px]:text-[5vw] placeholder:text-[1.3vw] max-[450px]:placeholder:text-[5vw]"
             style={{
               backgroundColor: colors.primaryBtn,
@@ -121,7 +136,7 @@ function Navbar({ colors }: NavbarProps) {
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
-            onClick={() => navigate("/Profile")}
+            onClick={handleProfileClick}
           >
             <img 
               src="/assets/Icons/Profile.gif" 

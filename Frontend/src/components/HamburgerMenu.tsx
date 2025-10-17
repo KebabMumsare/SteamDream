@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { checkAuth } from "../service/steamApi";
 
 interface HamburgerMenuProps {
   isOpen: boolean;
@@ -13,6 +14,17 @@ interface HamburgerMenuProps {
 
 const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }) => {
   const navigate = useNavigate();
+
+  const handleProfileClick = async () => {
+    const isAuthenticated = await checkAuth();
+    if (isAuthenticated) {
+      navigate('/profile');
+    } else {
+      navigate('/login');
+    }
+    onClose();
+  };
+
   if (!isOpen) return null;
   return (
     <div
@@ -54,7 +66,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }
         <button
           className="w-full flex items-center gap-4 text-white font-extrabold text-2xl rounded-xl py-3 px-6 shadow-md"
           style={{ backgroundColor: colors.primaryBtn }}
-          onClick={() => { navigate('/Profile'); onClose(); }}
+          onClick={handleProfileClick}
         >
           <img src="/assets/Icons/Profile.gif" alt="Profile" style={{ width: 38, height: 38 }} />
           <span className="text-white underline">Profile</span>

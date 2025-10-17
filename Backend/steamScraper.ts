@@ -220,16 +220,17 @@ async function processApp(appid: number, name: string): Promise<boolean> {
 
   // Only make API call for apps that pass the name filter
   const result = await fetchAppDetails(appid);
-
+  //console.log("result", result);
   const updateStmt = db.prepare(`
     UPDATE steam_apps 
     SET status = ?, last_checked = CURRENT_TIMESTAMP 
     WHERE appid = ?
   `);
 
+  // Check if the Steam API call was successful
   if (!result.success) {
     // Check if it's a Steam API error vs network error
-    if (result.error && result.error.startsWith('HTTP')) {
+    if (result.error) {
       // Network/HTTP error - retry later
       console.log(`[${timestamp()}] AppID ${appid} (${name}) → HTTP error: ${result.error} - will retry`);
       return false;
@@ -241,7 +242,8 @@ async function processApp(appid: number, name: string): Promise<boolean> {
     }
   }
 
-  const appData = result;
+  // Extract the actual app data from the Steam API response
+  const appData = result.data;  // ✅ Access the data field
   
   if (appData.type === 'game') {
     // Insert into steam_games

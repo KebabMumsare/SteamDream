@@ -7,8 +7,25 @@ import Profile from './Profile';
 import Login from './Login';
 import Favorite from './Favorite';
 import { useEffect, useState } from 'react';
+import { getAllGames } from './service/steamApi';
+
+interface Game {
+  appid: number;
+  name: string;
+  price_before_discount?: number;
+  price_after_discount?: number;
+  discount_percent?: number;
+  image_url?: string;
+  platforms?: any;
+  tags?: string[];
+  description?: string;
+}
 
 function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [games, setGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const [colors, setColors] = useState({
     background: '#1B2838',
     drawerBg: '#1B2838',
@@ -41,35 +58,75 @@ function App() {
     setFont({font: randomfonts});
   };
 
-  // Removed getApplist call – endpoint does not exist on backend and caused JSON parse errors
+  // Fetch games from database
   useEffect(() => {
-    // no-op
+    async function fetchGames() {
+      try {
+        console.log('🎮 Fetching games from database...');
+        setLoading(true);
+        const data = await getAllGames(100, 0);
+        console.log('✅ Games fetched:', data);
+        setGames(data.games || []);
+      } catch (error) {
+        console.error('❌ Failed to fetch games:', error);
+        setGames([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchGames();
   }, []);
 
   return (
     <BrowserRouter>
       <div className={font.font}>
-        <Navbar colors={colors} />
+        <Navbar colors={colors} searchTerm={searchTerm} onSearchChange={setSearchTerm} />
       <Routes>
         <Route
           path="/"
           element={
             <>
               <div className="max-w-[90%] mx-auto">
-                <div className='z-49 pt-[9vw] w-[90vw] fixed left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 87%, rgba(0,78,123,0) 100%)` }}>
+                <div className='z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
                   <h1
-                    className="text-white font-bold text-center mt-[2vw] mb-[4vw] underline"
+                    className="text-white font-bold text-center underline"
                     style={{ fontSize: "1.9vw" }}
                   >
                     SteamDream
                   </h1>
                 </div>
-                <div className="pt-[15vw] space-y-12">
-                  <Card />
-                  <Card />
-                  <Card />
-                  <Card />
-                  <Card />
+                <div className="pt-[18vw] space-y-12">
+                  {loading ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
+                      <p className="text-white/70 mt-4">Loading games...</p>
+                    </div>
+                  ) : games.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-white/70">No games found in database.</p>
+                    </div>
+                  ) : (
+                    games
+                      .filter(game => 
+                        game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+                      )
+                      .map((game) => (
+                        <Card 
+                          imageUrl={game.image_url}
+                          key={game.appid}
+                          title={game.name}
+                          genre=""
+                          originalPrice={game.price_before_discount}
+                          currentPrice={game.price_after_discount}
+                          discountPercent={game.discount_percent}
+                          platforms={game.platforms || {}}
+                          tags={game.tags || []}
+                          description={game.description || ''}
+                          steamUrl={`https://store.steampowered.com/app/${game.appid}`}
+                        />
+                      ))
+                  )}
                 </div>
               </div>
             </>
@@ -77,7 +134,7 @@ function App() {
         />
         <Route path="/profile" element={<Profile colors={colors} swapColors={swapColors} swapFont={swapFont} />} />
         <Route path="/login" element={<Login />} /> 
-        <Route path="/favorite" element={<Favorite colors={colors} />} />
+        <Route path="/favorite" element={<Favorite colors={colors} searchTerm={searchTerm} />} />
       </Routes>
       </div>
     </BrowserRouter>
