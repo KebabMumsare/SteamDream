@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { MouseEvent } from 'react';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
+import linux from '../assets/Icons/linux.png';
 import star from '../assets/Icons/star.png';
 import gul from '../assets/Icons/gul stjärna.png';
 import './Card.css';
@@ -15,11 +16,17 @@ interface CardProps {
   genre: string;
   platforms?: {
     windows?: boolean;
-    apple?: boolean;
+    mac?: boolean;
+    linux?: boolean;
   };
   tags?: string[];
   description: string;
   steamUrl?: string;
+  colors?: {
+    background: string;
+    primaryBtn: string;
+    primaryBtnHover: string;
+  };
 }
 
 function Card({
@@ -32,7 +39,12 @@ function Card({
   platforms = { windows: true },
   tags = [],
   description,
-  steamUrl
+  steamUrl,
+  colors = {
+    background: '#1B2838',
+    primaryBtn: '#66C0F4',
+    primaryBtnHover: '#2979A8'
+  }
 }: CardProps) {
   const [fav,setFav] = useState(false);
   
@@ -58,66 +70,77 @@ function Card({
   return (
     <div
       onClick={steamsite}
-      className="cursor-pointer hover:scale-[1.01] transition-transform mt-6 w-[85%] mx-auto max-w-[1600px] bg-[#1B2838] rounded-[1.5vw] grid gap-[1.2vw] sm:grid-cols-1 md:grid-cols-[16vw_1fr] lg:grid-cols-[16vw_1fr_20vw]"
-      style={{ padding: '1vw' }}
+      className="cursor-pointer hover:scale-[1.01] transition-transform mt-6 w-[90%] mx-auto max-w-[1600px] rounded-[1.5vw] grid gap-[1.2vw] sm:grid-cols-1 md:grid-cols-[16vw_1fr] lg:grid-cols-[16vw_1fr_20vw]"
+      style={{ padding: '1vw', backgroundColor: colors.background }}
     >
       {/* Image */}
-      <div className="relative aspect-[16/10] rounded-[1.4vw] overflow-hidden bg-black/30">
-        <img src={imageUrl} alt={`${title} artwork`} className="w-full h-full object-cover" />
+      <div className="relative aspect-[18/12] rounded-[1.4vw] overflow-hidden bg-black/30">
+        <img src={imageUrl} alt={`${title} artwork`} className="w-full h-full object-fill" />
       </div>
 
       {/* Main content */}
       <div className="flex flex-col" style={{ gap: '0.8vw' }}>
         {/* Title + Favorite */}
         <div className="flex items-center" style={{ gap: '0.6vw' }}>
-          <h2 className="bg-[#66C0F4] font-mono font-semibold rounded-[0.8vw] flex items-center w-max text-white shadow-sm" style={{ fontSize: '1.2vw', padding: '0.6vw 1vw', height: '2.8vw' }}>
+          <h2 className="font-semibold rounded-[0.8vw] flex items-center w-max text-white shadow-sm" style={{ fontSize: '1.2vw', padding: '0.6vw 1vw', height: '2.8vw', backgroundColor: colors.primaryBtn }}>
             {truncatedTitle}
           </h2>
           <button
             onClick={Favknapp}
             aria-pressed={fav}
-            className="inline-flex items-center justify-center p-0 rounded-[0.8vw] hover:scale-105 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66C0F4]/60"
+            className="inline-flex items-center justify-center p-0 rounded-[0.8vw] hover:scale-105 transition focus:outline-none focus-visible:ring-2"
+            style={{ '--tw-ring-color': `${colors.primaryBtn}60` } as any}
           >
             <img
               src={fav ? gul : star}
               alt={fav ? 'Favorited' : 'Add to favorites'}
-              className="bg-[#66C0F4] hover:bg-[#2979A8] rounded-[0.8vw] object-contain drop-shadow-md"
-              style={{ height: '2.8vw', width: '2.9vw' }}
+              className="rounded-[0.8vw] object-contain drop-shadow-md transition-colors"
+              style={{ height: '2.8vw', width: '2.9vw', backgroundColor: colors.primaryBtn }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
             />
           </button>
         </div>
 
         {/* Pricing */}
-        {(originalPrice !== undefined || currentPrice !== undefined) && (
+        {currentPrice !== undefined && currentPrice !== null && (
           <div className="flex flex-row items-end" style={{ gap: '1.2vw' }}>
-            {originalPrice !== undefined && discountPercent && (
-              <span className="font-mono line-through opacity-70 tracking-wide" style={{ fontSize: '0.75vw' }}>{originalPrice.toFixed(2)}$</span>
+            {/* Original Price (strikethrough) - only show if there's a real discount */}
+            {originalPrice !== undefined && originalPrice > 0 && discountPercent !== undefined && discountPercent > 0 && (
+              <span className="line-through opacity-70 tracking-wide" style={{ fontSize: '0.75vw' }}>{originalPrice.toFixed(2)}€</span>
             )}
-            {currentPrice !== undefined && (
-              <span className="font-mono text-white" style={{ fontSize: '1.3vw' }}>{currentPrice.toFixed(2)}$</span>
+            
+            {/* Current Price or "Free" */}
+            {currentPrice === 0 || currentPrice === null ? (
+              <span className="text-[#44CE3F] font-bold" style={{ fontSize: '1.3vw' }}>Free</span>
+            ) : (
+              <span className="text-white" style={{ fontSize: '1.3vw' }}>{currentPrice.toFixed(2)}€</span>
             )}
-            {discountPercent && (
-              <span className="font-mono bg-[#44CE3F] text-white rounded-md leading-none shadow" style={{ padding: '0.4vw 0.6vw', fontSize: '0.75vw' }}>
+            
+            {/* Discount Badge - only show if discount is greater than 0 */}
+            {discountPercent !== undefined && discountPercent > 0 && (
+              <span className="bg-[#44CE3F] text-white rounded-md leading-none shadow" style={{ padding: '0.4vw 0.6vw', fontSize: '0.75vw' }}>
                 -{discountPercent}%
-              </span>
+              </span> 
             )}
           </div>
         )}
 
         {/* Genre + Platforms */}
         <div className="flex flex-wrap items-center" style={{ gap: '0.8vw' }}>
-          <div className="inline-flex items-center font-mono text-white bg-[#66C0F4] rounded-lg font-semibold w-max shadow" style={{ fontSize: '0.7vw', padding: '0.4vw 0.6vw' }}>
+          <div className="inline-flex items-center text-white rounded-lg font-semibold w-max shadow" style={{ fontSize: '0.7vw', padding: '0.4vw 0.6vw', backgroundColor: colors.primaryBtn }}>
             {genre}
           </div>
           {platforms?.windows && <img src={windows} alt="Windows" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
-          {platforms?.apple && <img src={apple} alt="Apple" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
+          {platforms?.mac && <img src={apple} alt="Mac" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
+          {platforms?.linux && <img src={linux} alt="Linux" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
         </div>
 
         {/* Tags */}
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap" style={{ gap: '0.5vw' }}>
             {tags.map((tag, index) => (
-              <span key={index} className="rounded-md bg-[#44CE3F]/15 text-[#44CE3F] font-mono tracking-wide" style={{ padding: '0.3vw 0.5vw', fontSize: '0.7vw' }}>
+              <span key={index} className="rounded-md bg-[#44CE3F]/15 text-[#44CE3F] tracking-wide" style={{ padding: '0.3vw 0.5vw', fontSize: '0.7vw' }}>
                 {tag}
               </span>
             ))}
@@ -126,8 +149,8 @@ function Card({
       </div>
 
       {/* Description panel */}
-      <div className="relative font-mono text-white/90 bg-[#66C0F4] backdrop-blur-sm border border-white/10 rounded-lg leading-relaxed shadow-inner shadow-black/40 overflow-auto scrollbar-thin scrollbar-thumb-[#66C0F4]/25 scrollbar-track-transparent" style={{ padding: '0.8vw', fontSize: '0.75vw', maxHeight: '20vw' }}>
-        <div className="absolute inset-0 pointer-events-none rounded-lg bg-[#66C0F4]/5" />
+      <div className="relative text-white/90 backdrop-blur-sm border border-white/10 rounded-lg leading-relaxed shadow-inner shadow-black/40 overflow-auto scrollbar-thin scrollbar-track-transparent" style={{ padding: '0.8vw', fontSize: '0.75vw', maxHeight: '20vw', backgroundColor: colors.primaryBtn, scrollbarColor: `${colors.primaryBtn}40 transparent` }}>
+        <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ backgroundColor: `${colors.primaryBtn}0D` }} />
         <p className="relative z-10">
           {truncatedDescription}
         </p>

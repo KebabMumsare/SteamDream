@@ -2,6 +2,9 @@ import Card from './components/Card';
 
 interface FavoriteProps {
     colors: {
+        background: string;
+        primaryBtn: string;
+        primaryBtnHover: string;
         headerBg: string;
     };
     searchTerm: string;
@@ -103,6 +106,11 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
                             tags={game.tags}
                             description={game.description}
                             steamUrl={game.steamUrl}
+                            colors={{
+                                background: colors.background,
+                                primaryBtn: colors.primaryBtn,
+                                primaryBtnHover: colors.primaryBtnHover
+                            }}
                         />
                     ))}
                 </div>

@@ -298,6 +298,7 @@ app.get('/api/games', (req, res) => {
           gameData.image_url = extraData.capsule_image || extraData.header_image || '';
           gameData.platforms = extraData.platforms || {};
           gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
+          gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
           gameData.description = extraData.short_description || extraData.detailed_description || '';
         }
       } catch (e) {

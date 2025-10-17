@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Game from './components/game';
-import { getOwnedGames, getSteamLoginUrl, logout } from './service/steamApi';
+import { getOwnedGames, getSteamLoginUrl } from './service/steamApi';
+import Musica from './assets/Musica.png';
 
 
 interface ProfileProps {
@@ -36,21 +37,15 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
     useEffect(() => {
         async function fetchGames() {
             try {
-                console.log('🎮 Profile page loaded - Fetching games...');
                 setLoading(true);
-                
                 const data = await getOwnedGames();
-                console.log('✅ Games data received:', data);
-                console.log('✅ Number of games:', data.games?.length || 0);
-                
                 setGames(data.games || []);
                 setError(null); // Clear any previous errors
             } catch (err: any) {
-                console.error('❌ Failed to fetch owned games:', err);
+                console.error('Failed to fetch owned games:', err);
                 
                 // If 401 Unauthorized, user needs to login
                 if (err.message?.includes('401')) {
-                    console.log('❌ Not authenticated - need to login');
                     setError('Please login with Steam to view your games.');
                     setLoading(false);
                     return;
@@ -94,10 +89,10 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                   ✕
                 </button>
                 <h2 className="text-white underline pb-[20px]" style={{ fontSize: '8vw' }}>Main Settings:</h2>
-                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors} >Color-scheme: <img src="/assets/Icons/Colorscheme.png" alt="Color Scheme" className="w-[51px] h-[35px]" /></button>
-                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Font" className="w-[35px] h-[35px]" /></button>
+                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors} >Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[51px] h-[35px]" /></button>
+                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
                 <h2 className="text-white underline pb-[20px] pt-[50px]" style={{ fontSize: '8vw' }}>Login:</h2>
-                <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-xl flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="logout" className="w-[35px] h-[35px]" /></button>
+                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-xl flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
               </div>
             </aside>
 
@@ -105,10 +100,12 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                 <section className=" w-1/3 p-4 rounded-tr-[60px] max-[500px]:hidden"
                 style={{ backgroundColor: colors.background }}>
                     <h2 className="text-white underline pb-[20px]" style={{ fontSize: '1.9vw' }}>Main Settings:</h2>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw]  mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors}>Color-scheme: <img src="/assets/Icons/Colorscheme.png" alt="Color Scheme" className="w-[2vw] h-[1.3vw]" /></button>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Font" className="w-[1vw] h-[1vw]" /></button>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw]  mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors}>Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[2vw] h-[1.3vw]" /></button>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}> <img src={Musica} alt="Musica" className="w-[1vw] h-[1vw]" /></button>
                     <h2 className="text-white underline pb-[20px] pt-[50px]" style={{ fontSize: '1.9vw' }}>Login:</h2>
-                    <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="logout" className="w-[1vw] h-[1vw]" /></button>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
+                    
                     
                 </section>
                 <section className="z-49 flex-1 p-0 overflow-y-auto">
@@ -125,7 +122,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                                 aria-haspopup="dialog"
                                 aria-expanded={settingsOpen}
                             >
-                                <img src="/assets/Icons/settings.png" alt="Settings" className="w-[20px] h-[20px]" />
+                                <img src="/assets/Icons/Settings.png" alt="Settings" className="w-[20px] h-[20px]" />
                                 <span>Settings</span>
                             </button>
                         </div>
@@ -174,14 +171,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                                         img_icon_url={game.img_icon_url}
                                         img_logo_url={game.img_logo_url}
                                         rtime_last_played={game.rtime_last_played}
-                                        has_community_visible_stats={game.has_community_visible_stats}
-                                        colors={{
-                                            cardBg: colors.background,
-                                            titleBg: colors.primaryBtn,
-                                            descriptionBg: colors.primaryBtn,
-                                            textColor: 'white'
-                                        }}
-                                    />
+                                        has_community_visible_stats={game.has_community_visible_stats}/>
                                 ))}
                             </>
                          )}

@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import Profile from './Profile';
 import Login from './Login';
 import Favorite from './Favorite';
+import FilterButton from './components/FilterButton';
+import type { FilterState } from './components/FilterButton';
 import { useEffect, useState } from 'react';
 import { getAllGames } from './service/steamApi';
 
@@ -18,6 +20,7 @@ interface Game {
   image_url?: string;
   platforms?: any;
   tags?: string[];
+  categories?: string[];
   description?: string;
 }
 
@@ -25,7 +28,14 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [filters, setFilters] = useState<FilterState>({
+    discountMin: 0,
+    discountMax: 100,
+    priceMin: 0,
+    priceMax: 1000,
+    selectedGenres: [],
+  });
+
   const [colors, setColors] = useState({
     background: '#1B2838',
     drawerBg: '#1B2838',
@@ -89,12 +99,22 @@ function App() {
             <>
               <div className="max-w-[90%] mx-auto">
                 <div className='z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
-                  <h1
-                    className="text-white font-bold text-center underline"
-                    style={{ fontSize: "1.9vw" }}
-                  >
-                    SteamDream
-                  </h1>
+                  <div className="relative flex justify-center items-center">
+                    <h1
+                      className="text-white font-bold underline text-center"
+                      style={{ fontSize: "1.9vw" }}
+                    >
+                      SteamDream
+                    </h1>
+                    {/* Filter button positioned absolutely on the right */}
+                    <div className="absolute right-8">
+                      <FilterButton 
+                        games={games}
+                        onFilterChange={setFilters}
+                        colors={colors}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="pt-[18vw] space-y-12">
                   {loading ? (
@@ -108,15 +128,37 @@ function App() {
                     </div>
                   ) : (
                     games
-                      .filter(game => 
-                        game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-                      )
+                      .filter(game => {
+                        // Search filter
+                        if (!game.name.toLowerCase().startsWith(searchTerm.toLowerCase())) {
+                          return false;
+                        }
+
+                        // Discount and Price filters combined
+                        const discount = game.discount_percent || 0;
+                        const price = game.price_after_discount || game.price_before_discount || 0;
+                        
+                        if (discount < filters.discountMin || discount > filters.discountMax ||
+                            price < filters.priceMin || price > filters.priceMax) {
+                          return false;
+                        }
+
+                        // Genre filter
+                        if (filters.selectedGenres.length > 0) {
+                          const gameTags = game.tags || [];
+                          if (!filters.selectedGenres.some(genre => gameTags.includes(genre))) {
+                            return false;
+                          }
+                        }
+
+                        return true;
+                      })
                       .map((game) => (
                         <Card 
                           imageUrl={game.image_url}
                           key={game.appid}
                           title={game.name}
-                          genre=""
+                          genre={game.categories?.slice(0, 2).join(' & ') || ''}
                           originalPrice={game.price_before_discount}
                           currentPrice={game.price_after_discount}
                           discountPercent={game.discount_percent}
@@ -124,6 +166,11 @@ function App() {
                           tags={game.tags || []}
                           description={game.description || ''}
                           steamUrl={`https://store.steampowered.com/app/${game.appid}`}
+                          colors={{
+                            background: colors.background,
+                            primaryBtn: colors.primaryBtn,
+                            primaryBtnHover: colors.primaryBtnHover
+                          }}
                         />
                       ))
                   )}
