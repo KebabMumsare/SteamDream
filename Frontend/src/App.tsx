@@ -35,7 +35,7 @@ function App() {
     priceMax: 1000,
     selectedGenres: [],
   });
-
+  
   const [colors, setColors] = useState({
     background: '#1B2838',
     drawerBg: '#1B2838',
