@@ -72,83 +72,11 @@ function App() {
   useEffect(() => {
     async function fetchGames() {
       try {
-        console.log('🎮 Using hardcoded games...');
+        console.log('🎮 Fetching games from database...');
         setLoading(true);
-        
-        // Hardcoded games from Favorite page
-        const hardcodedGames = [
-          {
-            appid: 620,
-            name: "Portal 2",
-            price_before_discount: 999,
-            price_after_discount: 199,
-            discount_percent: 80,
-            platforms: { windows: true, apple: true },
-            tags: ['Co-op', 'Puzzle', 'Singleplayer'],
-            description: "Portal 2 är ett pussel-plattformsspel och uppföljaren till den prisbelönta titeln Portal. Du använder en portal-pistol för att lösa utmanande pussel i Aperture Science laboratorium under GLaDOS övervakning.",
-            image_url: "https://cdn.akamai.steamstatic.com/steam/apps/620/header.jpg"
-          },
-          {
-            appid: 413150,
-            name: "Stardew Valley",
-            price_after_discount: 1499,
-            platforms: { windows: true, apple: true },
-            tags: ['Farming', 'Relaxing', 'Multiplayer'],
-            description: "Stardew Valley är ett lantbruksimulationsspel där du tar över din farfars gamla gård. Odla grödor, ta hand om djur, utforska grottor och bygg relationer med byns invånare i detta charmiga pixel-art äventyr.",
-            image_url: "https://cdn.akamai.steamstatic.com/steam/apps/413150/header.jpg"
-          },
-          {
-            appid: 367520,
-            name: "Hollow Knight",
-            price_before_discount: 1499,
-            price_after_discount: 749,
-            discount_percent: 50,
-            platforms: { windows: true, apple: true },
-            tags: ['Indie', 'Difficult', 'Atmospheric'],
-            description: "Hollow Knight är ett handgjort 2D action-äventyr genom ett vackert och döende insektsrike. Utforska labyrinter av grottor, kämpa mot korrumperade varelser och bli vän med excentriska insekter.",
-            image_url: "https://cdn.akamai.steamstatic.com/steam/apps/367520/header.jpg"
-          },
-          {
-            appid: 1145360,
-            name: "Hades",
-            price_before_discount: 2499,
-            price_after_discount: 1249,
-            discount_percent: 50,
-            platforms: { windows: true, apple: true },
-            tags: ['Roguelike', 'Greek Mythology', 'Fast-Paced'],
-            description: "Hades är ett roguelike dungeon crawler där du spelar som Zagreus, son till Hades, och försöker fly från underjorden. Möt gudarna på Olympus som hjälper dig med kraftfulla gåvor i detta prisbelönta spel.",
-            image_url: "https://cdn.akamai.steamstatic.com/steam/apps/1145360/header.jpg"
-          },
-          {
-            appid: 105600,
-            name: "Terraria",
-            price_before_discount: 999,
-            price_after_discount: 499,
-            discount_percent: 50,
-            platforms: { windows: true, apple: true },
-            tags: ['Sandbox', 'Crafting', 'Multiplayer'],
-            description: "Terraria är ett 2D sandbox-äventyr där du kan gräva, bygga, utforska och slåss. Med otaliga monster att besegra och objekt att skapa är möjligheterna i denna pixelbaserade värld oändliga.",
-            image_url: "https://cdn.akamai.steamstatic.com/steam/apps/105600/header.jpg"
-          },
-          {
-            appid: 292030,
-            name: "The Witcher 3: Wild Hunt",
-            price_before_discount: 3999,
-            price_after_discount: 999,
-            discount_percent: 75,
-            platforms: { windows: true, apple: true },
-            tags: ['Open World', 'Story Rich', 'Dark Fantasy'],
-            description: "The Witcher 3: Wild Hunt är ett story-drivet, öppet världs RPG. Du är Geralt av Rivia, en monsterjägare på jakt efter ett barn från profetian. Utforska en visuellt fantastisk värld full av monster, magi och moral.",
-            image_url: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg"
-          }
-        ];
-        
-        setGames(hardcodedGames);
-        
-        // Uncomment to use database
-        // const data = await getAllGames(100, 0);
-        // console.log('✅ Games fetched:', data);
-        // setGames(data.games || []);
+        const data = await getAllGames(100, 0);
+        console.log('✅ Games fetched:', data);
+        setGames(data.games || []);
       } catch (error) {
         console.error('❌ Failed to fetch games:', error);
         setGames([]);
