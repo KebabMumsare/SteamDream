@@ -93,8 +93,11 @@ function App() {
   useEffect(() => {
     async function fetchFavorites() {
       try {
+        console.log('❤️ Fetching user favorites...');
         const data = await getFavorites();
+        console.log('❤️ Favorites data received:', data);
         const favoriteAppIds = data.favorites.map((fav: any) => fav.appid);
+        console.log('❤️ Favorite app IDs:', favoriteAppIds);
         setFavorites(favoriteAppIds);
       } catch (error) {
         console.error('❌ Failed to fetch favorites:', error);
@@ -107,19 +110,27 @@ function App() {
   // Handle favorite toggle
   const handleFavoriteToggle = async (appid: number, isFavorite: boolean) => {
     try {
+      console.log(`🔄 Toggle favorite - appid: ${appid}, isFavorite: ${isFavorite}`);
+      
       if (isFavorite) {
-        await addFavorite(appid);
+        const result = await addFavorite(appid);
+        console.log('✅ Add favorite result:', result);
         setFavorites(prev => [...prev, appid]);
         console.log(`✅ Added game ${appid} to favorites`);
       } else {
-        await removeFavorite(appid);
+        const result = await removeFavorite(appid);
+        console.log('✅ Remove favorite result:', result);
         setFavorites(prev => prev.filter(id => id !== appid));
         console.log(`✅ Removed game ${appid} from favorites`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to toggle favorite:', error);
       // Revert UI state on error
-      alert('Failed to update favorite. Please try again or log in.');
+      if (error.message?.includes('Not authenticated') || error.message?.includes('401')) {
+        alert('You must be logged in to add favorites. Please log in with Steam first.');
+      } else {
+        alert(`Failed to update favorite: ${error.message || 'Unknown error'}`);
+      }
     }
   };
 
