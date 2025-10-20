@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import Card from './components/Card';
+import { getFavoriteGames, addFavorite, removeFavorite } from './service/steamApi';
 
 interface FavoriteProps {
     colors: {
@@ -10,76 +12,57 @@ interface FavoriteProps {
     searchTerm: string;
 }
 
+interface Game {
+    appid: number;
+    name: string;
+    price_before_discount?: number;
+    price_after_discount?: number;
+    discount_percent?: number;
+    image_url?: string;
+    platforms?: any;
+    tags?: string[];
+    description?: string;
+}
+
 function Favorite({ colors, searchTerm }: FavoriteProps) {
-    const games = [
-        {
-            title: "Portal 2",
-            genre: "Puzzle & Adventure",
-            originalPrice: 9.99,
-            currentPrice: 1.99,
-            discountPercent: 80,
-            platforms: { windows: true, apple: true },
-            tags: ['Co-op', 'Puzzle', 'Singleplayer'],
-            description: "Portal 2 är ett pussel-plattformsspel och uppföljaren till den prisbelönta titeln Portal. Du använder en portal-pistol för att lösa utmanande pussel i Aperture Science laboratorium under GLaDOS övervakning.",
-            steamUrl: "https://store.steampowered.com/app/620/Portal_2/"
-        },
-        {
-            title: "Stardew Valley",
-            genre: "Simulation & RPG",
-            currentPrice: 14.99,
-            platforms: { windows: true, apple: true },
-            tags: ['Farming', 'Relaxing', 'Multiplayer'],
-            description: "Stardew Valley är ett lantbruksimulationsspel där du tar över din farfars gamla gård. Odla grödor, ta hand om djur, utforska grottor och bygg relationer med byns invånare i detta charmiga pixel-art äventyr.",
-            steamUrl: "https://store.steampowered.com/app/413150/Stardew_Valley/"
-        },
-        {
-            title: "Hollow Knight",
-            genre: "Metroidvania & Action",
-            originalPrice: 14.99,
-            currentPrice: 7.49,
-            discountPercent: 50,
-            platforms: { windows: true, apple: true },
-            tags: ['Indie', 'Difficult', 'Atmospheric'],
-            description: "Hollow Knight är ett handgjort 2D action-äventyr genom ett vackert och döende insektsrike. Utforska labyrinter av grottor, kämpa mot korrumperade varelser och bli vän med excentriska insekter.",
-            steamUrl: "https://store.steampowered.com/app/367520/Hollow_Knight/"
-        },
-        {
-            title: "Hades",
-            genre: "Roguelike & Action",
-            originalPrice: 24.99,
-            currentPrice: 12.49,
-            discountPercent: 50,
-            platforms: { windows: true, apple: true },
-            tags: ['Roguelike', 'Greek Mythology', 'Fast-Paced'],
-            description: "Hades är ett roguelike dungeon crawler där du spelar som Zagreus, son till Hades, och försöker fly från underjorden. Möt gudarna på Olympus som hjälper dig med kraftfulla gåvor i detta prisbelönta spel.",
-            steamUrl: "https://store.steampowered.com/app/1145360/Hades/"
-        },
-        {
-            title: "Terraria",
-            genre: "Sandbox & Adventure",
-            originalPrice: 9.99,
-            currentPrice: 4.99,
-            discountPercent: 50,
-            platforms: { windows: true, apple: true },
-            tags: ['Sandbox', 'Crafting', 'Multiplayer'],
-            description: "Terraria är ett 2D sandbox-äventyr där du kan gräva, bygga, utforska och slåss. Med otaliga monster att besegra och objekt att skapa är möjligheterna i denna pixelbaserade värld oändliga.",
-            steamUrl: "https://store.steampowered.com/app/105600/Terraria/"
-        },
-        {
-            title: "The Witcher 3",
-            genre: "RPG & Adventure",
-            originalPrice: 39.99,
-            currentPrice: 9.99,
-            discountPercent: 75,
-            platforms: { windows: true, apple: true },
-            tags: ['Open World', 'Story Rich', 'Dark Fantasy'],
-            description: "The Witcher 3: Wild Hunt är ett story-drivet, öppet världs RPG. Du är Geralt av Rivia, en monsterjägare på jakt efter ett barn från profetian. Utforska en visuellt fantastisk värld full av monster, magi och moral.",
-            steamUrl: "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/"
+    const [games, setGames] = useState<Game[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch favorite games from backend
+    useEffect(() => {
+        async function fetchFavorites() {
+            try {
+                const data = await getFavoriteGames();
+                setGames(data.games || []);
+            } catch (error) {
+                console.error('❌ Failed to fetch favorite games:', error);
+                setGames([]);
+            } finally {
+                setLoading(false);
+            }
         }
-    ];
+
+        fetchFavorites();
+    }, []);
+
+    // Handle favorite toggle (remove from favorites)
+    const handleFavoriteToggle = async (appid: number, isFavorite: boolean) => {
+        try {
+            if (isFavorite) {
+                await addFavorite(appid);
+            } else {
+                await removeFavorite(appid);
+                // Remove from local state
+                setGames(prev => prev.filter(game => game.appid !== appid));
+            }
+        } catch (error) {
+            console.error('❌ Failed to toggle favorite:', error);
+            alert('Failed to update favorite. Please try again.');
+        }
+    };
 
     const filteredGames = games.filter(game => 
-        game.title.toLowerCase().startsWith(searchTerm.toLowerCase())
+        game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
     );
 
     return (
@@ -94,25 +77,40 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
             </div>
             <div className="max-w-[90%] mx-auto min-h-screen">
                 <div className="pt-[14vw] space-y-12 pb-8 flex flex-col items-start">
-                    {filteredGames.map((game, index) => (
-                        <Card 
-                            key={index}
-                            title={game.title}
-                            genre={game.genre}
-                            originalPrice={game.originalPrice}
-                            currentPrice={game.currentPrice}
-                            discountPercent={game.discountPercent}
-                            platforms={game.platforms}
-                            tags={game.tags}
-                            description={game.description}
-                            steamUrl={game.steamUrl}
-                            colors={{
-                                background: colors.background,
-                                primaryBtn: colors.primaryBtn,
-                                primaryBtnHover: colors.primaryBtnHover
-                            }}
-                        />
-                    ))}
+                    {loading ? (
+                        <div className="text-center py-12 w-full">
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
+                            <p className="text-white/70 mt-4">Loading favorites...</p>
+                        </div>
+                    ) : filteredGames.length === 0 ? (
+                        <div className="text-center py-12 w-full">
+                            <p className="text-white/70">No favorite games yet. Start adding some!</p>
+                        </div>
+                    ) : (
+                        filteredGames.map((game) => (
+                            <Card 
+                                key={game.appid}
+                                appid={game.appid}
+                                title={game.name}
+                                genre=""
+                                originalPrice={game.price_before_discount}
+                                currentPrice={game.price_after_discount}
+                                discountPercent={game.discount_percent}
+                                platforms={game.platforms || {}}
+                                tags={game.tags || []}
+                                description={game.description || ''}
+                                steamUrl={`https://store.steampowered.com/app/${game.appid}`}
+                                imageUrl={game.image_url}
+                                isFavorite={true}
+                                onFavoriteToggle={handleFavoriteToggle}
+                                colors={{
+                                    background: colors.background,
+                                    primaryBtn: colors.primaryBtn,
+                                    primaryBtnHover: colors.primaryBtnHover
+                                }}
+                            />
+                        ))
+                    )}
                 </div>
             </div>
         </>
