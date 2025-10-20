@@ -21,6 +21,18 @@ dotenv.config();
 const db = new Database(path.join(__dirname, 'SteamDream.db'));
 console.log('✅ Database connected:', path.join(__dirname, 'SteamDream.db'));
 
+// Create favorites table if it doesn't exist
+db.exec(`
+  CREATE TABLE IF NOT EXISTS favorites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    appid INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, appid)
+  )
+`);
+console.log('✅ Favorites table initialized');
+
 const app = express();
 
 // Trust proxy for ngrok
@@ -315,6 +327,162 @@ app.get('/api/games', (req, res) => {
   } catch (error) {
     console.error('Error fetching games:', error);
     res.status(500).json({ error: 'Failed to fetch games' });
+  }
+});
+
+// ===== FAVORITES ENDPOINTS =====
+
+// Get user's favorites
+app.get('/api/favorites', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const user = req.user as any;
+    const steamId = user.id;
+
+    const favorites = db.prepare(`
+      SELECT appid, created_at
+      FROM favorites
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `).all(steamId);
+
+    res.json({ favorites });
+  } catch (error) {
+    console.error('Error fetching favorites:', error);
+    res.status(500).json({ error: 'Failed to fetch favorites' });
+  }
+});
+
+// Add a favorite
+app.post('/api/favorites', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const user = req.user as any;
+    const steamId = user.id;
+    const { appid } = req.body;
+
+    if (!appid) {
+      return res.status(400).json({ error: 'appid is required' });
+    }
+
+    // Insert favorite (UNIQUE constraint prevents duplicates)
+    db.prepare(`
+      INSERT INTO favorites (user_id, appid)
+      VALUES (?, ?)
+    `).run(steamId, appid);
+
+    res.json({ success: true, message: 'Favorite added' });
+  } catch (error: any) {
+    if (error.message?.includes('UNIQUE constraint')) {
+      return res.status(409).json({ error: 'Already in favorites' });
+    }
+    console.error('Error adding favorite:', error);
+    res.status(500).json({ error: 'Failed to add favorite' });
+  }
+});
+
+// Remove a favorite
+app.delete('/api/favorites/:appid', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const user = req.user as any;
+    const steamId = user.id;
+    const { appid } = req.params;
+
+    const result = db.prepare(`
+      DELETE FROM favorites
+      WHERE user_id = ? AND appid = ?
+    `).run(steamId, appid);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Favorite not found' });
+    }
+
+    res.json({ success: true, message: 'Favorite removed' });
+  } catch (error) {
+    console.error('Error removing favorite:', error);
+    res.status(500).json({ error: 'Failed to remove favorite' });
+  }
+});
+
+// Get favorite games with full details
+app.get('/api/favorites/games', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const user = req.user as any;
+    const steamId = user.id;
+
+    const favoriteGames = db.prepare(`
+      SELECT 
+        g.appid,
+        g.name,
+        g.type,
+        g.extra_data,
+        f.created_at as favorited_at
+      FROM favorites f
+      JOIN steam_games g ON f.appid = g.appid
+      WHERE f.user_id = ?
+      ORDER BY f.created_at DESC
+    `).all(steamId) as any[];
+
+    // Parse extra_data JSON for each game
+    const parsedGames = favoriteGames.map(game => {
+      let gameData: any = {
+        appid: game.appid,
+        name: game.name,
+        type: game.type,
+        favorited_at: game.favorited_at
+      };
+
+      try {
+        if (game.extra_data && typeof game.extra_data === 'string') {
+          const extraData = JSON.parse(game.extra_data);
+          
+          if (extraData.price_overview) {
+            gameData.price_before_discount = extraData.price_overview.initial;
+            gameData.price_after_discount = extraData.price_overview.final;
+            gameData.discount_percent = extraData.price_overview.discount_percent;
+          }
+
+          if (extraData.platforms) {
+            gameData.platforms = extraData.platforms;
+          }
+
+          if (extraData.genres) {
+            gameData.tags = extraData.genres.map((g: any) => g.description);
+          }
+
+          if (extraData.short_description) {
+            gameData.description = extraData.short_description;
+          }
+
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+        }
+      } catch (e) {
+        console.error(`Failed to parse extra_data for game ${game.appid}:`, e);
+      }
+
+      return gameData;
+    });
+
+    res.json({ games: parsedGames });
+  } catch (error) {
+    console.error('Error fetching favorite games:', error);
+    res.status(500).json({ error: 'Failed to fetch favorite games' });
   }
 });
 

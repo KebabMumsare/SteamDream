@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { MouseEvent } from 'react';
 import apple from '../assets/Icons/apple.png';
 import windows from '../assets/Icons/windows.png';
@@ -9,6 +9,7 @@ import './Card.css';
 
 interface CardProps {
   title: string;
+  appid?: number;
   imageUrl?: string;
   originalPrice?: number;
   currentPrice?: number;
@@ -22,6 +23,8 @@ interface CardProps {
   tags?: string[];
   description: string;
   steamUrl?: string;
+  isFavorite?: boolean;
+  onFavoriteToggle?: (appid: number, isFavorite: boolean) => void;
   colors?: {
     background: string;
     primaryBtn: string;
@@ -31,6 +34,7 @@ interface CardProps {
 
 function Card({
   title,
+  appid,
   imageUrl,
   originalPrice,
   currentPrice,
@@ -40,13 +44,20 @@ function Card({
   tags = [],
   description,
   steamUrl,
+  isFavorite = false,
+  onFavoriteToggle,
   colors = {
     background: '#1B2838',
     primaryBtn: '#66C0F4',
     primaryBtnHover: '#2979A8'
   }
 }: CardProps) {
-  const [fav,setFav] = useState(false);
+  const [fav, setFav] = useState(isFavorite);
+  
+  // Sync favorite state with prop changes
+  useEffect(() => {
+    setFav(isFavorite);
+  }, [isFavorite]);
   
   // Truncate title to 22 characters
   const truncatedTitle = title.length > 22
@@ -60,7 +71,12 @@ function Card({
   function Favknapp(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     e.preventDefault();
-    setFav(prev => !prev);
+    
+    if (appid && onFavoriteToggle) {
+      const newFavState = !fav;
+      setFav(newFavState);
+      onFavoriteToggle(appid, newFavState);
+    }
   }
     function steamsite() {
         if (steamUrl) {

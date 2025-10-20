@@ -91,3 +91,77 @@ export async function logout() {
 
 // Export helper for auth URL so UI can link correctly to backend
 export const getSteamLoginUrl = () => `${BACKEND_BASE}/auth/steam`;
+
+// ===== FAVORITES API =====
+
+// Get user's favorite app IDs
+export async function getFavorites() {
+  console.log('❤️ getFavorites() called');
+  const response = await fetch(`${BACKEND_BASE}/api/favorites`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.log('Not authenticated');
+      return { favorites: [] };
+    }
+    throw new Error(`Failed to fetch favorites: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Get user's favorite games with full details
+export async function getFavoriteGames() {
+  console.log('🎮❤️ getFavoriteGames() called');
+  const response = await fetch(`${BACKEND_BASE}/api/favorites/games`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.log('Not authenticated');
+      return { games: [] };
+    }
+    throw new Error(`Failed to fetch favorite games: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Add a game to favorites
+export async function addFavorite(appid: number) {
+  console.log(`➕ addFavorite(${appid}) called`);
+  const response = await fetch(`${BACKEND_BASE}/api/favorites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ appid }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `Failed to add favorite: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Remove a game from favorites
+export async function removeFavorite(appid: number) {
+  console.log(`➖ removeFavorite(${appid}) called`);
+  const response = await fetch(`${BACKEND_BASE}/api/favorites/${appid}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `Failed to remove favorite: ${response.status}`);
+  }
+  
+  return response.json();
+}
