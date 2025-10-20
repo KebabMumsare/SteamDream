@@ -20,7 +20,6 @@ interface Game {
   image_url?: string;
   platforms?: any;
   tags?: string[];
-  categories?: string[];
   description?: string;
 }
 
@@ -97,17 +96,46 @@ function App() {
           path="/"
           element={
             <>
+              <style>{`
+
+              @media (max-width: 2000px) {
+                  .header-mobile-padding {
+                    padding-top: 12vw !important;
+                  }
+                }
+                  
+                @media (max-width: 500px) {
+                  .header-mobile-padding {
+                    padding-top: 30vw !important;
+                  }
+                  .header-mobile-title {
+                    font-size: 8vw !important;
+                  }
+                  .cards-mobile-padding {
+                    padding-top: 50vw !important;
+                  }
+                  .header-mobile-layout {
+                    flex-direction: column !important;
+                    gap: 1rem !important;
+                  }
+                  .filter-button-mobile {
+                    position: static !important;
+                  }
+                }
+                
+                
+              `}</style>
               <div className="max-w-[90%] mx-auto">
-                <div className='z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
-                  <div className="relative flex justify-center items-center">
+                <div className='header-mobile-padding z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
+                  <div className="header-mobile-layout relative flex justify-center items-center">
                     <h1
-                      className="text-white font-bold underline text-center"
+                      className="header-mobile-title text-white font-bold underline text-center"
                       style={{ fontSize: "1.9vw" }}
                     >
                       SteamDream
                     </h1>
                     {/* Filter button positioned absolutely on the right */}
-                    <div className="absolute right-8">
+                    <div className="filter-button-mobile absolute right-8">
                       <FilterButton 
                         games={games}
                         onFilterChange={setFilters}
@@ -116,7 +144,7 @@ function App() {
                     </div>
                   </div>
                 </div>
-                <div className="pt-[18vw] space-y-12">
+                <div className="cards-mobile-padding pt-[18vw] space-y-12">
                   {loading ? (
                     <div className="text-center py-12">
                       <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
@@ -128,25 +156,29 @@ function App() {
                     </div>
                   ) : (
                     games
+                      .filter(game => 
+                        game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+                      )
                       .filter(game => {
-                        // Search filter
-                        if (!game.name.toLowerCase().startsWith(searchTerm.toLowerCase())) {
+                        // Discount filter
+                        const discount = game.discount_percent || 0;
+                        if (discount < filters.discountMin || discount > filters.discountMax) {
                           return false;
                         }
 
-                        // Discount and Price filters combined
-                        const discount = game.discount_percent || 0;
+                        // Price filter (using price_after_discount or price_before_discount)
                         const price = game.price_after_discount || game.price_before_discount || 0;
-                        
-                        if (discount < filters.discountMin || discount > filters.discountMax ||
-                            price < filters.priceMin || price > filters.priceMax) {
+                        if (price < filters.priceMin || price > filters.priceMax) {
                           return false;
                         }
 
                         // Genre filter
                         if (filters.selectedGenres.length > 0) {
                           const gameTags = game.tags || [];
-                          if (!filters.selectedGenres.some(genre => gameTags.includes(genre))) {
+                          const hasMatchingGenre = filters.selectedGenres.some(genre => 
+                            gameTags.includes(genre)
+                          );
+                          if (!hasMatchingGenre) {
                             return false;
                           }
                         }
@@ -158,7 +190,7 @@ function App() {
                           imageUrl={game.image_url}
                           key={game.appid}
                           title={game.name}
-                          genre={game.categories?.slice(0, 2).join(' & ') || ''}
+                          genre=""
                           originalPrice={game.price_before_discount}
                           currentPrice={game.price_after_discount}
                           discountPercent={game.discount_percent}
@@ -166,11 +198,6 @@ function App() {
                           tags={game.tags || []}
                           description={game.description || ''}
                           steamUrl={`https://store.steampowered.com/app/${game.appid}`}
-                          colors={{
-                            background: colors.background,
-                            primaryBtn: colors.primaryBtn,
-                            primaryBtnHover: colors.primaryBtnHover
-                          }}
                         />
                       ))
                   )}
