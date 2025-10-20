@@ -33,6 +33,17 @@ db.exec(`
 `);
 console.log('✅ Favorites table initialized');
 
+// Create user_preferences table if it doesn't exist
+db.exec(`
+  CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id TEXT PRIMARY KEY,
+    color_scheme TEXT,
+    font TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+console.log('✅ User preferences table initialized');
+
 const app = express();
 
 // Trust proxy for ngrok
@@ -494,6 +505,103 @@ app.get('/api/favorites/games', (req, res) => {
   } catch (error) {
     console.error('Error fetching favorite games:', error);
     res.status(500).json({ error: 'Failed to fetch favorite games' });
+  }
+});
+
+// ===== USER PREFERENCES ENDPOINTS =====
+
+// Get user preferences
+app.get('/api/preferences', (req, res) => {
+  console.log('\n⚙️ GET /api/preferences called');
+  console.log('   Authenticated:', req.isAuthenticated());
+  
+  if (!req.isAuthenticated()) {
+    console.log('   ❌ Not authenticated - returning 401');
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const user = req.user as any;
+    const steamId = user.id;
+    console.log('   Steam ID:', steamId);
+
+    const preferences = db.prepare(`
+      SELECT color_scheme, font, updated_at
+      FROM user_preferences
+      WHERE user_id = ?
+    `).get(steamId) as any;
+
+    if (!preferences) {
+      console.log('   ℹ️ No preferences found - returning defaults');
+      return res.json({ 
+        preferences: null,
+        message: 'No preferences saved yet'
+      });
+    }
+
+    // Parse color_scheme JSON string back to object
+    let colorScheme = null;
+    if (preferences.color_scheme) {
+      try {
+        colorScheme = JSON.parse(preferences.color_scheme);
+      } catch (e) {
+        console.error('   ⚠️ Failed to parse color_scheme JSON:', e);
+      }
+    }
+
+    console.log('   ✅ Preferences found:', { colorScheme, font: preferences.font });
+    res.json({ 
+      preferences: {
+        colorScheme,
+        font: preferences.font,
+        updatedAt: preferences.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('   ❌ Error fetching preferences:', error);
+    res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
+});
+
+// Update user preferences
+app.put('/api/preferences', (req, res) => {
+  console.log('\n💾 PUT /api/preferences called');
+  console.log('   Authenticated:', req.isAuthenticated());
+  console.log('   Request body:', req.body);
+  
+  if (!req.isAuthenticated()) {
+    console.log('   ❌ Not authenticated - returning 401');
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const user = req.user as any;
+    const steamId = user.id;
+    const { colorScheme, font } = req.body;
+
+    console.log('   Steam ID:', steamId);
+    console.log('   Color Scheme:', colorScheme);
+    console.log('   Font:', font);
+
+    // Convert colorScheme object to JSON string
+    const colorSchemeJson = colorScheme ? JSON.stringify(colorScheme) : null;
+
+    // Upsert preferences (insert or update)
+    db.prepare(`
+      INSERT INTO user_preferences (user_id, color_scheme, font, updated_at)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id) 
+      DO UPDATE SET 
+        color_scheme = excluded.color_scheme,
+        font = excluded.font,
+        updated_at = CURRENT_TIMESTAMP
+    `).run(steamId, colorSchemeJson, font);
+
+    console.log('   ✅ Preferences saved successfully');
+    res.json({ success: true, message: 'Preferences saved' });
+  } catch (error) {
+    console.error('   ❌ Error saving preferences:', error);
+    res.status(500).json({ error: 'Failed to save preferences' });
   }
 });
 

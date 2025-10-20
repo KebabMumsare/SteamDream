@@ -9,7 +9,7 @@ import Favorite from './Favorite';
 import FilterButton from './components/FilterButton';
 import type { FilterState } from './components/FilterButton';
 import { useEffect, useState } from 'react';
-import { getAllGames, getFavorites, addFavorite, removeFavorite } from './service/steamApi';
+import { getAllGames, getFavorites, addFavorite, removeFavorite, getPreferences, updatePreferences } from './service/steamApi';
 
 interface Game {
   appid: number;
@@ -47,7 +47,7 @@ function App() {
     headerBg: '#004E7B',
   });
 
-  const swapColors = () => {
+  const swapColors = async () => {
     const variants = [
       {ownedGamesHeader: `#66007B`, background: '#1B2838', drawerBg: '#1B2838', primaryBtn: '#D866F4', primaryBtnHover: '#8A3F9C', overlayBg: 'rgba(0, 0, 0, 0.4)', headerBg: '#66007B'},
       {ownedGamesHeader: `#6E6D6E`, background: '#434343', drawerBg: '#434343', primaryBtn: '#B4ADB6', primaryBtnHover: '#747175', overlayBg: 'rgba(0, 0, 0, 0.4)', headerBg: '#6E6D6E'},
@@ -59,14 +59,30 @@ function App() {
     const randomVariant = variants[Math.floor(Math.random() * variants.length)];
     setColors(randomVariant);
     document.documentElement.style.setProperty('--body-bg', randomVariant.headerBg);
+    
+    // Save to backend
+    try {
+      await updatePreferences(randomVariant, font.font);
+      console.log('✅ Color preferences saved');
+    } catch (error) {
+      console.error('❌ Failed to save color preferences:', error);
+    }
   };
 
   const [font, setFont] = useState({font: 'font-mono'});
 
-  const swapFont = () => {
+  const swapFont = async () => {
     const fonts = ["font-mono", "font-sans", "font-serif"];
     const randomfonts = fonts[Math.floor(Math.random() * fonts.length)];
     setFont({font: randomfonts});
+    
+    // Save to backend
+    try {
+      await updatePreferences(colors, randomfonts);
+      console.log('✅ Font preferences saved');
+    } catch (error) {
+      console.error('❌ Failed to save font preferences:', error);
+    }
   };
 
   // Fetch games from database
@@ -105,6 +121,38 @@ function App() {
     }
     
     fetchFavorites();
+  }, []);
+
+  // Fetch user's preferences (colors and font)
+  useEffect(() => {
+    async function fetchPreferences() {
+      try {
+        console.log('⚙️ Fetching user preferences...');
+        const data = await getPreferences();
+        console.log('⚙️ Preferences data received:', data);
+        
+        if (data.preferences) {
+          const { colorScheme, font } = data.preferences;
+          
+          if (colorScheme) {
+            console.log('🎨 Applying saved color scheme:', colorScheme);
+            setColors(colorScheme);
+            document.documentElement.style.setProperty('--body-bg', colorScheme.headerBg);
+          }
+          
+          if (font) {
+            console.log('🔤 Applying saved font:', font);
+            setFont({ font });
+          }
+        } else {
+          console.log('ℹ️ No saved preferences found, using defaults');
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch preferences:', error);
+      }
+    }
+    
+    fetchPreferences();
   }, []);
 
   // Handle favorite toggle
