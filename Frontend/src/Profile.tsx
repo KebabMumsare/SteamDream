@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Game from './components/game';
-import { getOwnedGames, getSteamLoginUrl } from './service/steamApi';
+import { getOwnedGames, getSteamLoginUrl, logout } from './service/steamApi';
 import Musica from './assets/Musica.png';
 
 
@@ -92,7 +92,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                 <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors} >Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[51px] h-[35px]" /></button>
                 <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
                 <h2 className="text-white underline pb-[20px] pt-[50px]" style={{ fontSize: '8vw' }}>Login:</h2>
-                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-xl flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
+                <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-xl flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
               </div>
             </aside>
 
@@ -104,7 +104,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}> <img src={Musica} alt="Musica" className="w-[1vw] h-[1vw]" /></button>
                     <h2 className="text-white underline pb-[20px] pt-[50px]" style={{ fontSize: '1.9vw' }}>Login:</h2>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
+                    <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     
                     
                 </section>
