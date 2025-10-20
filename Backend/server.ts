@@ -358,7 +358,12 @@ app.get('/api/favorites', (req, res) => {
 
 // Add a favorite
 app.post('/api/favorites', (req, res) => {
+  console.log('\n➕ POST /api/favorites called');
+  console.log('   Authenticated:', req.isAuthenticated());
+  console.log('   Request body:', req.body);
+  
   if (!req.isAuthenticated()) {
+    console.log('   ❌ Not authenticated - returning 401');
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
@@ -367,22 +372,28 @@ app.post('/api/favorites', (req, res) => {
     const steamId = user.id;
     const { appid } = req.body;
 
+    console.log('   Steam ID:', steamId);
+    console.log('   App ID:', appid);
+
     if (!appid) {
+      console.log('   ❌ Missing appid - returning 400');
       return res.status(400).json({ error: 'appid is required' });
     }
 
     // Insert favorite (UNIQUE constraint prevents duplicates)
-    db.prepare(`
+    const result = db.prepare(`
       INSERT INTO favorites (user_id, appid)
       VALUES (?, ?)
     `).run(steamId, appid);
 
+    console.log('   ✅ Favorite added successfully:', result);
     res.json({ success: true, message: 'Favorite added' });
   } catch (error: any) {
     if (error.message?.includes('UNIQUE constraint')) {
+      console.log('   ⚠️ Already in favorites');
       return res.status(409).json({ error: 'Already in favorites' });
     }
-    console.error('Error adding favorite:', error);
+    console.error('   ❌ Error adding favorite:', error);
     res.status(500).json({ error: 'Failed to add favorite' });
   }
 });
