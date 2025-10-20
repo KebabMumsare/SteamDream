@@ -165,3 +165,43 @@ export async function removeFavorite(appid: number) {
   
   return response.json();
 }
+
+// ===== USER PREFERENCES API =====
+
+// Get user preferences
+export async function getPreferences() {
+  console.log('⚙️ getPreferences() called');
+  const response = await fetch(`${BACKEND_BASE}/api/preferences`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.log('Not authenticated');
+      return { preferences: null };
+    }
+    throw new Error(`Failed to fetch preferences: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Update user preferences
+export async function updatePreferences(colorScheme: any, font: string) {
+  console.log('💾 updatePreferences() called', { colorScheme, font });
+  const response = await fetch(`${BACKEND_BASE}/api/preferences`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ colorScheme, font }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `Failed to update preferences: ${response.status}`);
+  }
+  
+  return response.json();
+}
