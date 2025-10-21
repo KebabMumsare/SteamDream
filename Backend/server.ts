@@ -355,6 +355,215 @@ app.get('/api/games', (req, res) => {
   }
 });
 
+// Search games across entire database
+app.get('/api/games/search', (req, res) => {
+  try {
+    const searchTerm = (req.query.q as string) || '';
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    if (!searchTerm) {
+      return res.json({ count: 0, games: [] });
+    }
+
+    // Search by name (case-insensitive)
+    const searchPattern = `%${searchTerm}%`;
+    
+    // Get total count of matching games
+    const countResult = db.prepare(`
+      SELECT COUNT(*) as count 
+      FROM steam_games 
+      WHERE name LIKE ?
+    `).get(searchPattern) as any;
+    
+    // Get matching games with pagination
+    const games = db.prepare(`
+      SELECT 
+        appid,
+        name,
+        type,
+        extra_data,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent
+      FROM steam_games 
+      WHERE name LIKE ?
+      ORDER BY discount_percent DESC, appid DESC
+      LIMIT ? OFFSET ?
+    `).all(searchPattern, limit, offset) as any[];
+
+    // Parse extra_data JSON for each matching game
+    const parsedGames = games.map(game => {
+      let gameData: any = {
+        appid: game.appid,
+        name: game.name,
+        type: game.type
+      };
+
+      try {
+        if (game.extra_data && typeof game.extra_data === 'string') {
+          const extraData = JSON.parse(game.extra_data);
+          
+          // Extract price information
+          if (extraData.price_overview) {
+            gameData.price_before_discount = extraData.price_overview.initial / 100;
+            gameData.price_after_discount = extraData.price_overview.final / 100;
+            gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0;
+            gameData.discount_percent = 0;
+          }
+          
+          // Extract other fields
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+          
+          gameData.platforms = extraData.platforms || {};
+          gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
+          gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
+          gameData.description = extraData.short_description || extraData.detailed_description || '';
+        }
+      } catch (e) {
+        console.error(`Error parsing game ${game.appid}:`, e);
+      }
+      
+      return gameData;
+    });
+
+    res.json({
+      count: countResult.count,
+      games: parsedGames
+    });
+  } catch (error) {
+    console.error('Error searching games:', error);
+    res.status(500).json({ error: 'Failed to search games' });
+  }
+});
+
+// Filter games with advanced criteria (discount, price, genres)
+app.get('/api/games/filter', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const discountMin = parseInt(req.query.discountMin as string) || 0;
+    const discountMax = parseInt(req.query.discountMax as string) || 100;
+    const priceMin = parseFloat(req.query.priceMin as string) || 0;
+    const priceMax = parseFloat(req.query.priceMax as string) || 1000;
+    const genres = req.query.genres ? (req.query.genres as string).split(',') : [];
+
+    console.log('Filter params:', { discountMin, discountMax, priceMin, priceMax, genres });
+
+    // Get all games first, then filter in JavaScript (since JSON filtering in SQLite is complex)
+    const allGames = db.prepare(`
+      SELECT 
+        appid,
+        name,
+        type,
+        extra_data,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.final'),
+            0
+          ) AS INTEGER
+        ) as price_cents
+      FROM steam_games 
+      ORDER BY discount_percent DESC, appid DESC
+    `).all() as any[];
+
+    // Filter games based on criteria
+    const filteredGames = allGames.filter(game => {
+      const discountPercent = game.discount_percent || 0;
+      const priceEuros = game.price_cents / 100;
+
+      // Discount filter
+      if (discountPercent < discountMin || discountPercent > discountMax) {
+        return false;
+      }
+
+      // Price filter
+      if (priceEuros < priceMin || priceEuros > priceMax) {
+        return false;
+      }
+
+      // Genre filter
+      if (genres.length > 0) {
+        try {
+          const extraData = JSON.parse(game.extra_data);
+          const gameTags = extraData.genres?.map((g: any) => g.description) || [];
+          const hasMatchingGenre = genres.some(genre => gameTags.includes(genre));
+          if (!hasMatchingGenre) {
+            return false;
+          }
+        } catch (e) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Apply pagination
+    const paginatedGames = filteredGames.slice(offset, offset + limit);
+
+    // Parse extra_data for paginated results
+    const parsedGames = paginatedGames.map(game => {
+      let gameData: any = {
+        appid: game.appid,
+        name: game.name,
+        type: game.type
+      };
+
+      try {
+        if (game.extra_data && typeof game.extra_data === 'string') {
+          const extraData = JSON.parse(game.extra_data);
+          
+          // Extract price information
+          if (extraData.price_overview) {
+            gameData.price_before_discount = extraData.price_overview.initial / 100;
+            gameData.price_after_discount = extraData.price_overview.final / 100;
+            gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0;
+            gameData.discount_percent = 0;
+          }
+          
+          // Extract other fields
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+          
+          gameData.platforms = extraData.platforms || {};
+          gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
+          gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
+          gameData.description = extraData.short_description || extraData.detailed_description || '';
+        }
+      } catch (e) {
+        console.error(`Error parsing game ${game.appid}:`, e);
+      }
+      
+      return gameData;
+    });
+
+    res.json({
+      count: filteredGames.length,
+      games: parsedGames
+    });
+  } catch (error) {
+    console.error('Error filtering games:', error);
+    res.status(500).json({ error: 'Failed to filter games' });
+  }
+});
+
 // ===== FAVORITES ENDPOINTS =====
 
 // Get user's favorites

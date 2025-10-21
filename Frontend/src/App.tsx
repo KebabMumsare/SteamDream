@@ -9,7 +9,7 @@ import Favorite from './Favorite';
 import FilterButton from './components/FilterButton';
 import type { FilterState } from './components/FilterButton';
 import { useEffect, useState, useRef } from 'react';
-import { getAllGames, getFavorites, addFavorite, removeFavorite, getPreferences, updatePreferences } from './service/steamApi';
+import { getAllGames, searchGames, filterGames, getFavorites, addFavorite, removeFavorite, getPreferences, updatePreferences } from './service/steamApi';
 
 interface Game {
   appid: number;
@@ -26,8 +26,10 @@ interface Game {
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false); // New state for search indicator
   const [favorites, setFavorites] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const gamesPerPage = 20;
@@ -35,6 +37,9 @@ function App() {
   
   // Cache for prefetched pages using useRef to avoid re-renders
   const pageCache = useRef<Map<number, Game[]>>(new Map());
+  const previousSearchTerm = useRef<string>('');
+  const hasLoadedOnce = useRef<boolean>(false);
+  const cachedTotalGames = useRef<number>(0); // Store total games count for non-search
   
   const [filters, setFilters] = useState<FilterState>({
     discountMin: 0,
@@ -99,8 +104,34 @@ function App() {
     return { games: data.games || [], count: data.count || 0 };
   };
 
-  // Prefetch adjacent pages (2 before and 2 after current page)
+  // Debounce search term (wait 500ms after user stops typing)
   useEffect(() => {
+    // Show searching indicator if search term differs from debounced
+    if (searchTerm !== debouncedSearchTerm && searchTerm.trim()) {
+      setSearching(true);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setSearching(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, debouncedSearchTerm]);
+
+  // Reset to page 1 when debounced search term or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, filters]);
+
+  // Prefetch adjacent pages (2 before and 2 after current page)
+  // Only prefetch when NOT searching or filtering
+  useEffect(() => {
+    // Skip prefetching when searching or filtering
+    if (debouncedSearchTerm.trim() || hasActiveFilters()) {
+      return;
+    }
+    
     const totalPages = Math.ceil(totalGames / gamesPerPage);
     
     // Define which pages to prefetch (2 before and 2 after)
@@ -133,23 +164,86 @@ function App() {
         console.log(`🗑️ Removed page ${cachedPage} from cache`);
       }
     }
-  }, [currentPage, totalGames]);
+  }, [currentPage, totalGames, debouncedSearchTerm]);
+
+  // Helper to check if filters are active
+  const hasActiveFilters = () => {
+    return filters.discountMin > 0 ||
+           filters.discountMax < 100 ||
+           filters.priceMin > 0 ||
+           filters.priceMax < 1000 ||
+           filters.selectedGenres.length > 0;
+  };
 
   // Fetch games from database (20 per page) with caching
+  // OR search games when debouncedSearchTerm is provided
+  // OR filter games when filters are active
   useEffect(() => {
     async function fetchGames() {
       try {
-        console.log(`🎮 Fetching games page ${currentPage}...`);
-        
-        // Check if page is in cache
-        if (pageCache.current.has(currentPage)) {
-          console.log(`✅ Loading page ${currentPage} from cache`);
-          setGames(pageCache.current.get(currentPage) || []);
+        // If there's a debounced search term, search across all games
+        if (debouncedSearchTerm.trim()) {
+          console.log(`🔍 Searching for: "${debouncedSearchTerm}" (page ${currentPage})`);
+          
+          // Track search term
+          previousSearchTerm.current = debouncedSearchTerm;
+          
+          // Only show loading spinner on very first page load, never during search
+          if (!hasLoadedOnce.current) {
+            setLoading(true);
+            hasLoadedOnce.current = true;
+          }
+          
+          const offset = (currentPage - 1) * gamesPerPage;
+          const data = await searchGames(debouncedSearchTerm, gamesPerPage, offset);
+          console.log('✅ Search results:', data);
+          
+          setGames(data.games || []);
+          setTotalGames(data.count || 0);
           setLoading(false);
           return;
         }
         
-        setLoading(true);
+        // Reset previous search term when not searching
+        previousSearchTerm.current = '';
+        
+        // If filters are active, fetch filtered games from backend
+        if (hasActiveFilters()) {
+          console.log(`🎯 Fetching filtered games (page ${currentPage})...`);
+          
+          if (!hasLoadedOnce.current) {
+            setLoading(true);
+            hasLoadedOnce.current = true;
+          }
+          
+          const offset = (currentPage - 1) * gamesPerPage;
+          const data = await filterGames(filters, gamesPerPage, offset);
+          console.log('✅ Filtered results:', data);
+          
+          setGames(data.games || []);
+          setTotalGames(data.count || 0);
+          setLoading(false);
+          return;
+        }
+        
+        // Normal pagination with caching when no search term or filters
+        console.log(`🎮 Fetching games page ${currentPage}...`);
+        
+        // Check if page is in cache
+        if (pageCache.current.has(currentPage) && cachedTotalGames.current > 0) {
+          console.log(`✅ Loading page ${currentPage} from cache`);
+          setGames(pageCache.current.get(currentPage) || []);
+          setTotalGames(cachedTotalGames.current); // Restore cached total count
+          setLoading(false);
+          hasLoadedOnce.current = true;
+          return;
+        }
+        
+        // Only show loading spinner on very first load
+        if (!hasLoadedOnce.current) {
+          setLoading(true);
+          hasLoadedOnce.current = true;
+        }
         
         // Fetch current page
         const { games, count } = await fetchPage(currentPage);
@@ -157,6 +251,7 @@ function App() {
         
         setGames(games);
         setTotalGames(count);
+        cachedTotalGames.current = count; // Cache the total count
         
         // Add to cache
         pageCache.current.set(currentPage, games);
@@ -169,7 +264,7 @@ function App() {
     }
     
     fetchGames();
-  }, [currentPage]); // Re-fetch when page changes
+  }, [currentPage, debouncedSearchTerm, filters]); // Re-fetch when page, search term, or filters change
 
   // Fetch user's favorites
   useEffect(() => {
@@ -309,6 +404,16 @@ function App() {
               </div>
               <div className="max-w-[90%] mx-auto min-h-screen">
                 <div className="cards-mobile-padding pt-[14vw] space-y-12 pb-8 flex flex-col items-start">
+                  {/* Search indicator */}
+                  {searching && (
+                    <div className="w-full text-center py-2">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: colors.primaryBtn + '20', border: `1px solid ${colors.primaryBtn}` }}>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        <span className="text-white text-sm">Searching...</span>
+                      </div>
+                    </div>
+                  )}
+                  
                   {loading ? (
                     <div className="text-center py-12 w-full">
                       <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
@@ -319,38 +424,8 @@ function App() {
                       <p className="text-white/70">No games found in database.</p>
                     </div>
                   ) : (
-                    <>
-                      {games
-                        .filter(game => 
-                          game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-                        )
-                        .filter(game => {
-                          // Discount filter
-                          const discount = game.discount_percent || 0;
-                          if (discount < filters.discountMin || discount > filters.discountMax) {
-                            return false;
-                          }
-
-                          // Price filter (using price_after_discount or price_before_discount)
-                          const price = game.price_after_discount || game.price_before_discount || 0;
-                          if (price < filters.priceMin || price > filters.priceMax) {
-                            return false;
-                          }
-
-                          // Genre filter
-                          if (filters.selectedGenres.length > 0) {
-                            const gameTags = game.tags || [];
-                            const hasMatchingGenre = filters.selectedGenres.some(genre => 
-                              gameTags.includes(genre)
-                            );
-                            if (!hasMatchingGenre) {
-                              return false;
-                            }
-                          }
-
-                          return true;
-                        })
-                        .map((game) => (
+                    <div className={`w-full transition-opacity duration-300 ${searching ? 'opacity-50' : 'opacity-100'}`}>
+                      {games.map((game) => (
                           <Card 
                             imageUrl={game.image_url}
                             key={game.appid}
@@ -373,12 +448,12 @@ function App() {
                             }}
                           />
                         ))}
-                    </>
+                    </div>
                   )}
                 </div>
                 
                 {/* Pagination Controls at Bottom of Page */}
-                <div className="flex justify-center items-center gap-4 w-full py-8" style={{ backgroundColor: '#0a0f16' }}>
+                <div className="flex justify-center items-center gap-4 w-full py-8">
                   <button
                       onClick={() => {
                         setCurrentPage(prev => Math.max(1, prev - 1));

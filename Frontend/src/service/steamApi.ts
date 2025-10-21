@@ -57,6 +57,53 @@ export async function getAllGames(limit = 100, offset = 0) {
   return response.json();
 }
 
+// Search games across entire database
+export async function searchGames(searchTerm: string, limit = 20, offset = 0) {
+  console.log('🔍 searchGames() called with term:', searchTerm);
+  const response = await fetch(`${BACKEND_BASE}/api/games/search?q=${encodeURIComponent(searchTerm)}&limit=${limit}&offset=${offset}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to search games: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Filter games across entire database
+export async function filterGames(filters: {
+  discountMin: number;
+  discountMax: number;
+  priceMin: number;
+  priceMax: number;
+  selectedGenres: string[];
+}, limit = 20, offset = 0) {
+  console.log('🎯 filterGames() called with filters:', filters);
+  const params = new URLSearchParams({
+    limit: limit.toString(),
+    offset: offset.toString(),
+    discountMin: filters.discountMin.toString(),
+    discountMax: filters.discountMax.toString(),
+    priceMin: filters.priceMin.toString(),
+    priceMax: filters.priceMax.toString(),
+  });
+  
+  if (filters.selectedGenres.length > 0) {
+    params.append('genres', filters.selectedGenres.join(','));
+  }
+  
+  const response = await fetch(`${BACKEND_BASE}/api/games/filter?${params.toString()}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to filter games: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
 // Check if user is authenticated
 export async function checkAuth(): Promise<boolean> {
   try {
