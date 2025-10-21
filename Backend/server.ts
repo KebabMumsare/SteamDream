@@ -281,10 +281,11 @@ app.get('/api/scraper/game/:appid', (req, res) => {
 // Get all games with specific fields (name, price, discount, etc.)
 app.get('/api/games', (req, res) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 100;
+    const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
     
-    const games = db.prepare(`
+    // First, get ALL games from the database (no LIMIT/OFFSET here)
+    const allGames = db.prepare(`
       SELECT 
         appid,
         name,
@@ -292,11 +293,10 @@ app.get('/api/games', (req, res) => {
         extra_data
       FROM steam_games 
       ORDER BY appid DESC
-      LIMIT ? OFFSET ?
-    `).all(limit, offset) as any[];
+    `).all() as any[];
 
     // Parse extra_data JSON for each game and extract relevant fields
-    const parsedGames = games.map(game => {
+    const parsedGames = allGames.map(game => {
       let gameData: any = {
         appid: game.appid,
         name: game.name,
@@ -334,9 +334,27 @@ app.get('/api/games', (req, res) => {
       return gameData;
     });
 
+    // Sort by discount percentage (highest first), then by appid as secondary sort
+    parsedGames.sort((a, b) => {
+      const discountA = a.discount_percent || 0;
+      const discountB = b.discount_percent || 0;
+      
+      // If discounts are equal, sort by appid descending
+      if (discountA === discountB) {
+        return b.appid - a.appid;
+      }
+      
+      // Sort by discount percentage descending (highest first)
+      return discountB - discountA;
+    });
+
+    // Apply pagination AFTER sorting
+    const paginatedGames = parsedGames.slice(offset, offset + limit);
+
     res.json({
-      count: parsedGames.length,
-      games: parsedGames
+      count: paginatedGames.length,
+      total: parsedGames.length,
+      games: paginatedGames
     });
   } catch (error) {
     console.error('Error fetching games:', error);
