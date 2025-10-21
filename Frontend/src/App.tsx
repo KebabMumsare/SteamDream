@@ -8,7 +8,7 @@ import Login from './Login';
 import Favorite from './Favorite';
 import FilterButton from './components/FilterButton';
 import type { FilterState } from './components/FilterButton';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getAllGames, getFavorites, addFavorite, removeFavorite, getPreferences, updatePreferences } from './service/steamApi';
 
 interface Game {
@@ -29,6 +29,13 @@ function App() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const gamesPerPage = 20;
+  const [totalGames, setTotalGames] = useState(0);
+  
+  // Cache for prefetched pages using useRef to avoid re-renders
+  const pageCache = useRef<Map<number, Game[]>>(new Map());
+  
   const [filters, setFilters] = useState<FilterState>({
     discountMin: 0,
     discountMax: 100,
@@ -85,16 +92,74 @@ function App() {
     }
   };
 
-  // Fetch games from database
+  // Helper function to fetch a specific page
+  const fetchPage = async (page: number): Promise<{ games: Game[], count: number }> => {
+    const offset = (page - 1) * gamesPerPage;
+    const data = await getAllGames(gamesPerPage, offset);
+    return { games: data.games || [], count: data.count || 0 };
+  };
+
+  // Prefetch adjacent pages (2 before and 2 after current page)
+  useEffect(() => {
+    const totalPages = Math.ceil(totalGames / gamesPerPage);
+    
+    // Define which pages to prefetch (2 before and 2 after)
+    const pagesToPrefetch: number[] = [];
+    for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+      if (i > 0 && i <= totalPages && i !== currentPage) {
+        pagesToPrefetch.push(i);
+      }
+    }
+
+    // Prefetch pages that aren't already cached
+    pagesToPrefetch.forEach(async (page) => {
+      if (!pageCache.current.has(page)) {
+        try {
+          const { games } = await fetchPage(page);
+          pageCache.current.set(page, games);
+          console.log(`📦 Prefetched page ${page}`);
+        } catch (error) {
+          console.error(`❌ Failed to prefetch page ${page}:`, error);
+        }
+      }
+    });
+
+    // Clean up cache: remove pages outside the 2-page range
+    const validPages = new Set([currentPage, ...pagesToPrefetch]);
+    
+    for (const cachedPage of pageCache.current.keys()) {
+      if (!validPages.has(cachedPage)) {
+        pageCache.current.delete(cachedPage);
+        console.log(`🗑️ Removed page ${cachedPage} from cache`);
+      }
+    }
+  }, [currentPage, totalGames]);
+
+  // Fetch games from database (20 per page) with caching
   useEffect(() => {
     async function fetchGames() {
       try {
-        console.log('🎮 Fetching games from database...');
-        setLoading(true);
-        const data = await getAllGames(20, 0);
-        console.log('✅ Games fetched:', data);
+        console.log(`🎮 Fetching games page ${currentPage}...`);
         
-        setGames(data.games || []);
+        // Check if page is in cache
+        if (pageCache.current.has(currentPage)) {
+          console.log(`✅ Loading page ${currentPage} from cache`);
+          setGames(pageCache.current.get(currentPage) || []);
+          setLoading(false);
+          return;
+        }
+        
+        setLoading(true);
+        
+        // Fetch current page
+        const { games, count } = await fetchPage(currentPage);
+        console.log('✅ Games fetched:', { games, count });
+        
+        setGames(games);
+        setTotalGames(count);
+        
+        // Add to cache
+        pageCache.current.set(currentPage, games);
       } catch (error) {
         console.error('❌ Failed to fetch games:', error);
         setGames([]);
@@ -104,7 +169,7 @@ function App() {
     }
     
     fetchGames();
-  }, []);
+  }, [currentPage]); // Re-fetch when page changes
 
   // Fetch user's favorites
   useEffect(() => {
@@ -122,7 +187,7 @@ function App() {
     }
     
     fetchFavorites();
-  }, []);
+  }, []); 
 
   // Fetch user's preferences (colors and font)
   useEffect(() => {
@@ -254,61 +319,104 @@ function App() {
                       <p className="text-white/70">No games found in database.</p>
                     </div>
                   ) : (
-                    games
-                      .filter(game => 
-                        game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-                      )
-                      .filter(game => {
-                        // Discount filter
-                        const discount = game.discount_percent || 0;
-                        if (discount < filters.discountMin || discount > filters.discountMax) {
-                          return false;
-                        }
-
-                        // Price filter (using price_after_discount or price_before_discount)
-                        const price = game.price_after_discount || game.price_before_discount || 0;
-                        if (price < filters.priceMin || price > filters.priceMax) {
-                          return false;
-                        }
-
-                        // Genre filter
-                        if (filters.selectedGenres.length > 0) {
-                          const gameTags = game.tags || [];
-                          const hasMatchingGenre = filters.selectedGenres.some(genre => 
-                            gameTags.includes(genre)
-                          );
-                          if (!hasMatchingGenre) {
+                    <>
+                      {games
+                        .filter(game => 
+                          game.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+                        )
+                        .filter(game => {
+                          // Discount filter
+                          const discount = game.discount_percent || 0;
+                          if (discount < filters.discountMin || discount > filters.discountMax) {
                             return false;
                           }
-                        }
 
-                        return true;
-                      })
-                      .map((game) => (
-                        <Card 
-                          imageUrl={game.image_url}
-                          key={game.appid}
-                          appid={game.appid}
-                          title={game.name}
-                          genre={game.categories?.slice(0, 2).join(' & ') || ''}
-                          originalPrice={game.price_before_discount}
-                          currentPrice={game.price_after_discount}
-                          discountPercent={game.discount_percent}
-                          platforms={game.platforms || {}}
-                          tags={game.tags || []}
-                          description={game.description || ''}
-                          steamUrl={`https://store.steampowered.com/app/${game.appid}`}
-                          isFavorite={favorites.includes(game.appid)}
-                          onFavoriteToggle={handleFavoriteToggle}
-                          colors={{
-                            background: colors.background,
-                            primaryBtn: colors.primaryBtn,
-                            primaryBtnHover: colors.primaryBtnHover
-                          }}
-                        />
-                      ))
+                          // Price filter (using price_after_discount or price_before_discount)
+                          const price = game.price_after_discount || game.price_before_discount || 0;
+                          if (price < filters.priceMin || price > filters.priceMax) {
+                            return false;
+                          }
+
+                          // Genre filter
+                          if (filters.selectedGenres.length > 0) {
+                            const gameTags = game.tags || [];
+                            const hasMatchingGenre = filters.selectedGenres.some(genre => 
+                              gameTags.includes(genre)
+                            );
+                            if (!hasMatchingGenre) {
+                              return false;
+                            }
+                          }
+
+                          return true;
+                        })
+                        .map((game) => (
+                          <Card 
+                            imageUrl={game.image_url}
+                            key={game.appid}
+                            appid={game.appid}
+                            title={game.name}
+                            genre={game.categories?.slice(0, 2).join(' & ') || ''}
+                            originalPrice={game.price_before_discount}
+                            currentPrice={game.price_after_discount}
+                            discountPercent={game.discount_percent}
+                            platforms={game.platforms || {}}
+                            tags={game.tags || []}
+                            description={game.description || ''}
+                            steamUrl={`https://store.steampowered.com/app/${game.appid}`}
+                            isFavorite={favorites.includes(game.appid)}
+                            onFavoriteToggle={handleFavoriteToggle}
+                            colors={{
+                              background: colors.background,
+                              primaryBtn: colors.primaryBtn,
+                              primaryBtnHover: colors.primaryBtnHover
+                            }}
+                          />
+                        ))}
+                    </>
                   )}
                 </div>
+                
+                {/* Pagination Controls at Bottom of Page */}
+                <div className="flex justify-center items-center gap-4 w-full py-8" style={{ backgroundColor: '#0a0f16' }}>
+                  <button
+                      onClick={() => {
+                        setCurrentPage(prev => Math.max(1, prev - 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === 1}
+                      className="px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ 
+                        backgroundColor: currentPage === 1 ? colors.background : colors.primaryBtn,
+                        color: 'white'
+                      }}
+                      onMouseEnter={(e) => currentPage !== 1 && (e.currentTarget.style.backgroundColor = colors.primaryBtnHover)}
+                      onMouseLeave={(e) => currentPage !== 1 && (e.currentTarget.style.backgroundColor = colors.primaryBtn)}
+                    >
+                      Previous
+                    </button>
+
+                    <span className="text-white font-semibold text-lg">
+                      Page {currentPage} of {Math.ceil(totalGames / gamesPerPage)}
+                    </span>
+
+                    <button
+                      onClick={() => {
+                        setCurrentPage(prev => Math.min(Math.ceil(totalGames / gamesPerPage), prev + 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      disabled={currentPage >= Math.ceil(totalGames / gamesPerPage)}
+                      className="px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ 
+                        backgroundColor: currentPage >= Math.ceil(totalGames / gamesPerPage) ? colors.background : colors.primaryBtn,
+                        color: 'white'
+                      }}
+                      onMouseEnter={(e) => currentPage < Math.ceil(totalGames / gamesPerPage) && (e.currentTarget.style.backgroundColor = colors.primaryBtnHover)}
+                      onMouseLeave={(e) => currentPage < Math.ceil(totalGames / gamesPerPage) && (e.currentTarget.style.backgroundColor = colors.primaryBtn)}
+                    >
+                      Next
+                    </button>
+                  </div>
               </div>
             </>
           }

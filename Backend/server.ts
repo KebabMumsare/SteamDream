@@ -284,19 +284,30 @@ app.get('/api/games', (req, res) => {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
     
-    // First, get ALL games from the database (no LIMIT/OFFSET here)
-    const allGames = db.prepare(`
+    // Get total count first (fast query)
+    const totalCount = db.prepare(`SELECT COUNT(*) as count FROM steam_games`).get() as any;
+    
+    // Fetch only the games we need for this page
+    // We'll use a subquery to extract discount_percent from JSON for sorting
+    const games = db.prepare(`
       SELECT 
         appid,
         name,
         type,
-        extra_data
+        extra_data,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent
       FROM steam_games 
-      ORDER BY appid DESC
-    `).all() as any[];
+      ORDER BY discount_percent DESC, appid DESC
+      LIMIT ? OFFSET ?
+    `).all(limit, offset) as any[];
 
-    // Parse extra_data JSON for each game and extract relevant fields
-    const parsedGames = allGames.map(game => {
+    // Parse extra_data JSON only for the games we're returning
+    const parsedGames = games.map(game => {
       let gameData: any = {
         appid: game.appid,
         name: game.name,
@@ -334,27 +345,9 @@ app.get('/api/games', (req, res) => {
       return gameData;
     });
 
-    // Sort by discount percentage (highest first), then by appid as secondary sort
-    parsedGames.sort((a, b) => {
-      const discountA = a.discount_percent || 0;
-      const discountB = b.discount_percent || 0;
-      
-      // If discounts are equal, sort by appid descending
-      if (discountA === discountB) {
-        return b.appid - a.appid;
-      }
-      
-      // Sort by discount percentage descending (highest first)
-      return discountB - discountA;
-    });
-
-    // Apply pagination AFTER sorting
-    const paginatedGames = parsedGames.slice(offset, offset + limit);
-
     res.json({
-      count: paginatedGames.length,
-      total: parsedGames.length,
-      games: paginatedGames
+      count: totalCount.count, // Total count of all games
+      games: parsedGames // Just the games for this page
     });
   } catch (error) {
     console.error('Error fetching games:', error);

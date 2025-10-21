@@ -58,7 +58,7 @@ function Login() {
       </style>
       <div
         className="bg-[#1B2838] rounded-2xl shadow-lg p-10 flex flex-col items-center w-full mt-32 loginbox"
-      >
+      > 
         <h2
           className="font-bold text-white mb-8 login-title"
         >
