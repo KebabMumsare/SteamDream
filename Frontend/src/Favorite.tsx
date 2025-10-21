@@ -22,6 +22,7 @@ interface Game {
     platforms?: any;
     tags?: string[];
     description?: string;
+     categories?: string[];
 }
 
 function Favorite({ colors, searchTerm }: FavoriteProps) {
@@ -92,7 +93,7 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
                                 key={game.appid}
                                 appid={game.appid}
                                 title={game.name}
-                                genre=""
+                                genre={game.categories?.slice(0, 2).join(' & ') || ''}
                                 originalPrice={game.price_before_discount}
                                 currentPrice={game.price_after_discount}
                                 discountPercent={game.discount_percent}

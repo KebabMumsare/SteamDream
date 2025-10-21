@@ -317,8 +317,11 @@ app.get('/api/games', (req, res) => {
             gameData.discount_percent = 0;
           }
           
-          // Extract other fields
-          gameData.image_url = extraData.capsule_image || extraData.header_image || '';
+          // Extract other fields (use header_image like favorites endpoint)
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+          
           gameData.platforms = extraData.platforms || {};
           gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
           gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
@@ -472,10 +475,14 @@ app.get('/api/favorites/games', (req, res) => {
         if (game.extra_data && typeof game.extra_data === 'string') {
           const extraData = JSON.parse(game.extra_data);
           
+          // Extract price information (convert cents to dollars/euros - same as /api/games)
           if (extraData.price_overview) {
-            gameData.price_before_discount = extraData.price_overview.initial;
-            gameData.price_after_discount = extraData.price_overview.final;
+            gameData.price_before_discount = extraData.price_overview.initial / 100;
+            gameData.price_after_discount = extraData.price_overview.final / 100;
             gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0; // Free game
+            gameData.discount_percent = 0;
           }
 
           if (extraData.platforms) {
@@ -484,6 +491,10 @@ app.get('/api/favorites/games', (req, res) => {
 
           if (extraData.genres) {
             gameData.tags = extraData.genres.map((g: any) => g.description);
+          }
+
+          if (extraData.categories) {
+            gameData.categories = extraData.categories.map((c: any) => c.description);
           }
 
           if (extraData.short_description) {

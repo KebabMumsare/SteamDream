@@ -91,7 +91,7 @@ function App() {
       try {
         console.log('🎮 Fetching games from database...');
         setLoading(true);
-        const data = await getAllGames(100, 0);
+        const data = await getAllGames(503, 0);
         console.log('✅ Games fetched:', data);
         setGames(data.games || []);
       } catch (error) {
