@@ -93,6 +93,7 @@ function App() {
         setLoading(true);
         const data = await getAllGames(503, 0);
         console.log('✅ Games fetched:', data);
+        
         setGames(data.games || []);
       } catch (error) {
         console.error('❌ Failed to fetch games:', error);
@@ -156,7 +157,7 @@ function App() {
   }, []);
 
   // Handle favorite toggle
-  const handleFavoriteToggle = async (appid: number, isFavorite: boolean) => {
+  const handleFavoriteToggle = async (appid: number, isFavorite: boolean): Promise<boolean> => {
     try {
       console.log(`🔄 Toggle favorite - appid: ${appid}, isFavorite: ${isFavorite}`);
       
@@ -165,20 +166,23 @@ function App() {
         console.log('✅ Add favorite result:', result);
         setFavorites(prev => [...prev, appid]);
         console.log(`✅ Added game ${appid} to favorites`);
+        return true;
       } else {
         const result = await removeFavorite(appid);
         console.log('✅ Remove favorite result:', result);
         setFavorites(prev => prev.filter(id => id !== appid));
         console.log(`✅ Removed game ${appid} from favorites`);
+        return true;
       }
     } catch (error: any) {
       console.error('❌ Failed to toggle favorite:', error);
-      // Revert UI state on error
+      // Show error message
       if (error.message?.includes('Not authenticated') || error.message?.includes('401')) {
         alert('You must be logged in to add favorites. Please log in with Steam first.');
       } else {
         alert(`Failed to update favorite: ${error.message || 'Unknown error'}`);
       }
+      return false;
     }
   };
 
@@ -220,33 +224,33 @@ function App() {
                 
                 
               `}</style>
-              <div className="max-w-[90%] mx-auto">
-                <div className='header-mobile-padding z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
-                  <div className="header-mobile-layout relative flex justify-center items-center">
-                    <h1
-                      className="header-mobile-title text-white font-bold underline text-center"
-                      style={{ fontSize: "1.9vw" }}
-                    >
-                      SteamDream
-                    </h1>
-                    {/* Filter button positioned absolutely on the right */}
-                    <div className="filter-button-mobile absolute right-8">
-                      <FilterButton 
-                        games={games}
-                        onFilterChange={setFilters}
-                        colors={colors}
-                      />
-                    </div>
+              <div className='header-mobile-padding z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
+                <div className="header-mobile-layout relative flex justify-center items-center">
+                  <h1
+                    className="header-mobile-title text-white font-bold underline text-center"
+                    style={{ fontSize: "1.9vw" }}
+                  >
+                    SteamDream
+                  </h1>
+                  {/* Filter button positioned absolutely on the right */}
+                  <div className="filter-button-mobile absolute right-8">
+                    <FilterButton 
+                      games={games}
+                      onFilterChange={setFilters}
+                      colors={colors}
+                    />
                   </div>
                 </div>
-                <div className="cards-mobile-padding pt-[18vw] space-y-12">
+              </div>
+              <div className="max-w-[90%] mx-auto min-h-screen">
+                <div className="cards-mobile-padding pt-[14vw] space-y-12 pb-8 flex flex-col items-start">
                   {loading ? (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12 w-full">
                       <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
                       <p className="text-white/70 mt-4">Loading games...</p>
                     </div>
                   ) : games.length === 0 ? (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12 w-full">
                       <p className="text-white/70">No games found in database.</p>
                     </div>
                   ) : (

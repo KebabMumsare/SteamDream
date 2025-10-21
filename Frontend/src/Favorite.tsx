@@ -47,18 +47,21 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
     }, []);
 
     // Handle favorite toggle (remove from favorites)
-    const handleFavoriteToggle = async (appid: number, isFavorite: boolean) => {
+    const handleFavoriteToggle = async (appid: number, isFavorite: boolean): Promise<boolean> => {
         try {
             if (isFavorite) {
                 await addFavorite(appid);
+                return true;
             } else {
                 await removeFavorite(appid);
                 // Remove from local state
                 setGames(prev => prev.filter(game => game.appid !== appid));
+                return true;
             }
         } catch (error) {
             console.error('❌ Failed to toggle favorite:', error);
             alert('Failed to update favorite. Please try again.');
+            return false;
         }
     };
 
