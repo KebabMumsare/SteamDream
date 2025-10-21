@@ -22,6 +22,7 @@ interface Game {
     platforms?: any;
     tags?: string[];
     description?: string;
+     categories?: string[];
 }
 
 function Favorite({ colors, searchTerm }: FavoriteProps) {
@@ -46,18 +47,21 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
     }, []);
 
     // Handle favorite toggle (remove from favorites)
-    const handleFavoriteToggle = async (appid: number, isFavorite: boolean) => {
+    const handleFavoriteToggle = async (appid: number, isFavorite: boolean): Promise<boolean> => {
         try {
             if (isFavorite) {
                 await addFavorite(appid);
+                return true;
             } else {
                 await removeFavorite(appid);
                 // Remove from local state
                 setGames(prev => prev.filter(game => game.appid !== appid));
+                return true;
             }
         } catch (error) {
             console.error('❌ Failed to toggle favorite:', error);
             alert('Failed to update favorite. Please try again.');
+            return false;
         }
     };
 
@@ -92,7 +96,7 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
                                 key={game.appid}
                                 appid={game.appid}
                                 title={game.name}
-                                genre=""
+                                genre={game.categories?.slice(0, 2).join(' & ') || ''}
                                 originalPrice={game.price_before_discount}
                                 currentPrice={game.price_after_discount}
                                 discountPercent={game.discount_percent}

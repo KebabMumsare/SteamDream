@@ -24,7 +24,7 @@ interface CardProps {
   description: string;
   steamUrl?: string;
   isFavorite?: boolean;
-  onFavoriteToggle?: (appid: number, isFavorite: boolean) => void;
+  onFavoriteToggle?: (appid: number, isFavorite: boolean) => Promise<boolean>;
   colors?: {
     background: string;
     primaryBtn: string;
@@ -68,14 +68,22 @@ function Card({
     ? description.substring(0, 270) + '...'
     : description;
   
-  function Favknapp(e: MouseEvent<HTMLButtonElement>) {
+  async function Favknapp(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     e.preventDefault();
     
     if (appid && onFavoriteToggle) {
       const newFavState = !fav;
+      // Optimistically update UI
       setFav(newFavState);
-      onFavoriteToggle(appid, newFavState);
+      
+      // Call the toggle function and check if it succeeded
+      const success = await onFavoriteToggle(appid, newFavState);
+      
+      // If it failed, revert the UI change
+      if (!success) {
+        setFav(!newFavState);
+      }
     }
   }
     function steamsite() {
