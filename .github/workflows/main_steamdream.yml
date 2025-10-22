@@ -24,6 +24,8 @@ jobs:
           node-version: '22.x'
 
       - name: npm install and build
+        env:
+          VITE_BACKEND_URL: https://steamdream-server-ffcxf5g6c9crdzgv.swedencentral-01.azurewebsites.net
         run: |
           npm install --production=false
           npm run build
