@@ -118,7 +118,7 @@ async function fetchAppList() {
 
   try {
     const response = await fetch('https://api.steampowered.com/ISteamApps/GetAppList/v2/');
-    const data = await response.json();
+    const data = await response.json() as any;
     const apps = data.applist.apps;
 
     console.log(`[SETUP] Fetched ${apps.length} apps from Steam API`);
@@ -175,7 +175,7 @@ async function fetchAppDetails(appid: number, retryCount = 0): Promise<any> {
       return { success: false, error: `HTTP ${response.status}` };
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     const appData = data[appid];
     
     // Better handling of missing app data

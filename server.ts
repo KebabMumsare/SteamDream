@@ -210,7 +210,7 @@ app.get('/api/steam/owned-games', async (req, res) => {
     const url = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${apiKey}&steamid=${steamId}&format=json&include_appinfo=true&include_played_free_games=true`;
     console.log('🌐 Calling Steam API for Steam ID:', steamId);
     
-    const data = await fetchSteamAPI(url);
+    const data = await fetchSteamAPI(url) as any;
     const gameCount = data.response?.game_count || 0;
     
     console.log(`✅ SUCCESS! Fetched ${gameCount} games`);
