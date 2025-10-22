@@ -5,6 +5,18 @@
   },
   "routes": [
     {
+      "route": "/assets/*.js",
+      "headers": {
+        "content-type": "text/javascript; charset=utf-8"
+      }
+    },
+    {
+      "route": "/assets/*.css",
+      "headers": {
+        "content-type": "text/css; charset=utf-8"
+      }
+    },
+    {
       "route": "/api/*",
       "allowedRoles": ["anonymous"]
     }
