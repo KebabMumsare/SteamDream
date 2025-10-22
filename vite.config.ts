@@ -11,5 +11,11 @@ export default defineConfig({
         changeOrigin: true,
       },
     }
-  }
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  // Copy public folder contents (including web.config) to dist
+  publicDir: 'public'
 })
