@@ -46,11 +46,14 @@ console.log('✅ User preferences table initialized');
 
 const app = express();
 
-// Trust proxy for ngrok
+// Trust proxy for Azure
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: true,
+  origin: [
+    'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
+    'http://localhost:5173' // Local development
+  ],
   credentials: true
 }));
 app.use(express.json());
