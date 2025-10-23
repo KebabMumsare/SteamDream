@@ -286,8 +286,23 @@ app.get('/api/games', (req, res) => {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
     
-    // Get total count first (fast query)
+    // Enforce maximum of 1000 games total
+    const MAX_GAMES = 1000;
+    
+    // If offset is beyond 1000, return empty
+    if (offset >= MAX_GAMES) {
+      return res.json({
+        count: MAX_GAMES,
+        games: []
+      });
+    }
+    
+    // Adjust limit if it would exceed 1000
+    const adjustedLimit = Math.min(limit, MAX_GAMES - offset);
+    
+    // Get total count first (fast query, capped at 1000)
     const totalCount = db.prepare(`SELECT COUNT(*) as count FROM steam_games`).get() as any;
+    const cappedCount = Math.min(totalCount.count, MAX_GAMES);
     
     // Fetch only the games we need for this page
     // We'll use a subquery to extract discount_percent from JSON for sorting
@@ -306,7 +321,7 @@ app.get('/api/games', (req, res) => {
       FROM steam_games 
       ORDER BY discount_percent DESC, appid DESC
       LIMIT ? OFFSET ?
-    `).all(limit, offset) as any[];
+    `).all(adjustedLimit, offset) as any[];
 
     // Parse extra_data JSON only for the games we're returning
     const parsedGames = games.map(game => {
@@ -348,7 +363,7 @@ app.get('/api/games', (req, res) => {
     });
 
     res.json({
-      count: totalCount.count, // Total count of all games
+      count: cappedCount, // Total count capped at 1000
       games: parsedGames // Just the games for this page
     });
   } catch (error) {
