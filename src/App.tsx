@@ -11,6 +11,7 @@ import type { FilterState } from './components/FilterButton';
 import { useEffect, useState, useRef } from 'react';
 import { getAllGames, searchGames, filterGames, getFavorites, addFavorite, removeFavorite, getPreferences, updatePreferences } from './service/steamApi';
 
+//test
 interface Game {
   appid: number;
   name: string;
