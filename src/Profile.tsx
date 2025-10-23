@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Game from './components/game';
 import { getOwnedGames, getSteamLoginUrl, logout } from './service/steamApi';
 import Musica from './assets/Musica.png';
@@ -29,6 +30,7 @@ interface OwnedGame {
 }
 
 function Profile({ colors, swapColors, swapFont }: ProfileProps) {
+    const navigate = useNavigate();
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [games, setGames] = useState<OwnedGame[]>([]);
     const [loading, setLoading] = useState(true);
@@ -44,10 +46,10 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
             } catch (err: any) {
                 console.error('Failed to fetch owned games:', err);
                 
-                // If 401 Unauthorized, user needs to login
+                // If 401 Unauthorized, user needs to login - redirect to login page
                 if (err.message?.includes('401')) {
-                    setError('Please login with Steam to view your games.');
-                    setLoading(false);
+                    console.log('User not authenticated, redirecting to login...');
+                    navigate('/login');
                     return;
                 }
                 
@@ -58,7 +60,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
         }
 
         fetchGames();
-    }, []);
+    }, [navigate]);
 
 
 
@@ -74,75 +76,77 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
 
             {/* Settings drawer - only visible at ≤500px */}
             <aside
-              className={`fixed top-0 left-0 z-[70] h-screen w-[80vw] max-w-[320px] shadow-2xl transform transition-transform duration-300 ease-out rounded-r-2xl max-[500px]:block hidden ${settingsOpen ? 'translate-x-0' : '-translate-x-full'}`}
-              style={{ backgroundColor: colors.drawerBg }}
+              className={`fixed top-0 left-0 z-[70] h-screen w-[80vw] shadow-2xl transform transition-transform duration-300 ease-out rounded-r-2xl max-[500px]:block hidden ${settingsOpen ? 'translate-x-0' : '-translate-x-full'}`}
+              style={{ backgroundColor: colors.drawerBg, maxWidth: '20vw' }}
               role="dialog"
               aria-modal="true"
               aria-label="Settings"
             >
-              <div className="pt-[20%] p-4 overflow-y-auto h-full">
+              <div className="overflow-y-auto h-full" style={{ paddingTop: '20%', padding: '1vw' }}>
                 <button
                   onClick={() => setSettingsOpen(false)}
-                  className="absolute right-4 top-4 text-white/80 hover:bg-[#661C1D] bg-[#B73234] rounded-[56px] w-9 h-9 place-items-center text-xl text-center flex items-center justify-center"
+                  className="absolute text-white/80 hover:bg-[#661C1D] bg-[#B73234] place-items-center text-xl text-center flex items-center justify-center"
+                  style={{ right: '1vw', top: '1vw', borderRadius: '3.5vw', width: '2.5vw', height: '2.5vw' }}
                   aria-label="Close settings"
                 >
                   ✕
                 </button>
-                <h2 className="text-white underline pb-[20px]" style={{ fontSize: '8vw' }}>Main Settings:</h2>
-                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors} >Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[51px] h-[35px]" /></button>
-                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
-                <h2 className="text-white underline pb-[20px] pt-[50px]" style={{ fontSize: '8vw' }}>Login:</h2>
-                <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[230px] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-xl flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[35px] h-[35px]" /></button>
+                <h2 className="text-white underline" style={{ fontSize: '8vw', paddingBottom: '1.5vw' }}>Main Settings:</h2>
+                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl flex items-center rounded-full" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out', marginTop: '1vw', paddingLeft: '1.5vw', gap: '0.5vw', padding: '0.5vw' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors} >Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[4vw] h-[2.5vw]" /></button>
+                <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-xl flex items-center rounded-full" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out', width: '16vw', marginTop: '1.5vw', paddingLeft: '1.5vw', gap: '0.5vw', padding: '0.5vw' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[2.5vw] h-[2.5vw]" /></button>
+                <h2 className="text-white underline" style={{ fontSize: '8vw', paddingBottom: '1.5vw', paddingTop: '3.5vw' }}>Login:</h2>
+                <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-xl flex items-center justify-center bg-[#B73234] rounded-full" style={{ width: '16vw', marginTop: '1.5vw', gap: '0.5vw', padding: '0.5vw' }}>Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[2.5vw] h-[2.5vw]" /></button>
               </div>
             </aside>
 
-            <main className="flex flex-row gap-[3rem] h-screen w-full pt-24 md:pt-28 lg:pt-32 min-[1400px]:pt-[10%] overflow-hidden">
-                <section className=" w-1/3 p-4 rounded-tr-[60px] max-[500px]:hidden"
-                style={{ backgroundColor: colors.background }}>
-                    <h2 className="text-white underline pb-[20px]" style={{ fontSize: '1.9vw' }}>Main Settings:</h2>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw]  mt-[15px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors}>Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[2vw] h-[1.3vw]" /></button>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
-                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] pl-[20px] flex items-center gap-2 rounded-full p-2" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}> <img src={Musica} alt="Musica" className="w-[1vw] h-[1vw]" /></button>
-                    <h2 className="text-white underline pb-[20px] pt-[50px]" style={{ fontSize: '1.9vw' }}>Login:</h2>
-                    <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] mt-[20px] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center gap-2 bg-[#B73234] rounded-full p-2">Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
+            <main className="flex flex-row h-screen w-full overflow-hidden" style={{ gap: '3vw', paddingTop: '6vw' }}>
+                <section className=" w-1/3 rounded-tr-[60px] max-[500px]:hidden"
+                style={{ backgroundColor: colors.background, padding: '1vw' }}>
+                    <h2 className="text-white underline" style={{ fontSize: '1.9vw', paddingBottom: '1.5vw' }}>Main Settings:</h2>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 text-[0.8vw] flex items-center rounded-full" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out', marginTop: '1vw', paddingLeft: '1.5vw', gap: '0.5vw', padding: '0.5vw' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapColors}>Color-scheme: <img src="/assets/Icons/colorscheme.png" alt="Color Scheme" className="w-[2vw] h-[1.3vw]" /></button>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] flex items-center rounded-full" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out', marginTop: '1.5vw', paddingLeft: '1.5vw', gap: '0.5vw', padding: '0.5vw' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}>Font-family: <img src="/assets/Icons/Font.png" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
+                    <button className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] transition delay-150 duration-300 ease-in-out hover:-translate-y-1  text-[0.8vw] flex items-center rounded-full" style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out', marginTop: '1.5vw', paddingLeft: '1.5vw', gap: '0.5vw', padding: '0.5vw' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn} onClick={swapFont}> <img src={Musica} alt="Musica" className="w-[1vw] h-[1vw]" /></button>
+                    <h2 className="text-white underline" style={{ fontSize: '1.9vw', paddingBottom: '1.5vw', paddingTop: '3.5vw' }}>Login:</h2>
+                    <button onClick={logout} className="shadow-[0_35px_35px_rgba(0,0,0,0.25)] w-[13vw] h-[2.5vw] transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:bg-[#661C1D] text-[0.8vw] flex items-center justify-center bg-[#B73234] rounded-full" style={{ marginTop: '1.5vw', gap: '0.5vw', padding: '0.5vw' }}>Log-out <img src="/assets/Icons/Logout.svg" alt="Color Scheme" className="w-[1vw] h-[1vw]" /></button>
                     
                     
                 </section>
-                <section className="z-49 flex-1 p-0 overflow-y-auto">
-                    <div className="sticky pb-[20px] top-0 z-[48]" style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 87%, rgba(0,78,123,0) 100%)` }}>
-                        <h1 className="text-white text-center font-bold underline py-3" style={{ fontSize: '1.9vw' }}>Owned games</h1>
+                <section className="z-49 flex-1 overflow-y-auto" style={{ padding: 0 }}>
+                    <div className="sticky top-0 z-[48]" style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 87%, rgba(0,78,123,0) 100%)`, paddingBottom: '1.5vw' }}>
+                        <h1 className="text-white text-center font-bold underline" style={{ fontSize: '1.9vw', paddingTop: '0.8vw', paddingBottom: '0.8vw' }}>Owned games</h1>
 
-                        <div className="hidden max-[500px]:flex justify-center pb-3">
+                        <div className="hidden max-[500px]:flex justify-center" style={{ paddingBottom: '0.8vw' }}>
                             <button
                                 onClick={() => setSettingsOpen(true)}
-                                className="text-white rounded-full z-49 px-3 py-1.5 shadow inline-flex items-center gap-2"
-                                style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out' }}
+                                className="text-white rounded-full z-49 shadow inline-flex items-center"
+                                style={{ backgroundColor: colors.primaryBtn, transition: 'all 0.3s ease-in-out', paddingLeft: '0.8vw', paddingRight: '0.8vw', paddingTop: '0.4vw', paddingBottom: '0.4vw', gap: '0.5vw' }}
                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
                                 aria-haspopup="dialog"
                                 aria-expanded={settingsOpen}
                             >
-                                <img src="/assets/Icons/Settings.png" alt="Settings" className="w-[20px] h-[20px]" />
+                                <img src="/assets/Icons/Settings.png" alt="Settings" className="w-[1.5vw] h-[1.5vw]" />
                                 <span>Settings</span>
                             </button>
                         </div>
                     </div>
-              <div className='p-4 space-y-4 max-w-[90%] mx-auto pb-8'>
+              <div className='mx-auto' style={{ padding: '1vw', maxWidth: '90%', paddingBottom: '2vw', display: 'flex', flexDirection: 'column', gap: '1vw' }}>
                     {/* Loading state */}
                         {loading && (
-                            <div className="text-center py-12">
-                                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
-                                <p className="text-white/70 mt-4">Loading your games...</p>
+                            <div className="text-center" style={{ paddingTop: '3vw', paddingBottom: '3vw' }}>
+                                <div className="inline-block animate-spin rounded-full border-4 border-[#66C0F4] border-t-transparent" style={{ height: '3vw', width: '3vw' }}></div>
+                                <p className="text-white/70" style={{ marginTop: '1vw' }}>Loading your games...</p>
                             </div>
                         )}
 
                         {/* Error state */}
                         {error && (
-                            <div className="text-center py-12">
-                                <p className="text-red-400 mb-4">{error}</p>
+                            <div className="text-center" style={{ paddingTop: '3vw', paddingBottom: '3vw' }}>
+                                <p className="text-red-400" style={{ marginBottom: '1vw' }}>{error}</p>
                                 <a 
                                     href={getSteamLoginUrl()}
-                                    className="inline-block bg-[#66C0F4] hover:bg-[#2979A8] text-white font-bold py-3 px-6 rounded-lg transition"
+                                    className="inline-block bg-[#66C0F4] hover:bg-[#2979A8] text-white font-bold transition"
+                                    style={{ paddingTop: '0.8vw', paddingBottom: '0.8vw', paddingLeft: '1.5vw', paddingRight: '1.5vw', borderRadius: '0.5vw' }}
                                 >
                                     Login with Steam
                                 </a>
@@ -151,7 +155,7 @@ function Profile({ colors, swapColors, swapFont }: ProfileProps) {
 
                         {/* Empty state */}
                         {!loading && !error && games.length === 0 && (
-                            <div className="text-center py-12">
+                            <div className="text-center" style={{ paddingTop: '3vw', paddingBottom: '3vw' }}>
                                 <p className="text-white/70">No games found in your library.</p>
                             </div>
                         )}

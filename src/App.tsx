@@ -356,44 +356,44 @@ function App() {
           element={
             <>
               <style>{`
+                .header-section {
+                  padding-top: 10vw;
+                }
 
-              @media (max-width: 2000px) {
-                  .header-mobile-padding {
-                    padding-top: 12vw !important;
+                @media (max-width: 2000px) {
+                  .header-section {
+                    padding-top: 12vw;
                   }
                 }
 
                 @media (max-width: 500px) {
-                  .header-mobile-padding {
-                    padding-top: 30vw !important;
+                  .header-section {
+                    padding-top: 30vw;
                   }
                   .header-mobile-title {
                     font-size: 8vw !important;
                   }
                   .cards-mobile-padding {
-                    padding-top: 50vw !important;
-                  }
-                  .header-mobile-layout {
-                    flex-direction: column !important;
-                    gap: 1rem !important;
-                  }
-                  .filter-button-mobile {
-                    position: static !important;
+                    padding-top: 45vw !important;
                   }
                 }
-                
-                
               `}</style>
-              <div className='header-mobile-padding z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
-                <div className="header-mobile-layout relative flex justify-center items-center">
-                  <h1
-                    className="header-mobile-title text-white font-bold underline text-center"
-                    style={{ fontSize: "1.9vw" }}
-                  >
+              
+              {/* Header Section with Title and Filter */}
+              <div className='header-section fixed top-0 left-0 right-0 z-40' 
+                   style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 80%, transparent 100%)`, paddingBottom: '1vw' }}>
+                <div className="w-[90vw] mx-auto flex justify-between items-center" style={{ paddingLeft: '2vw', paddingRight: '2vw' }}>
+                  {/* Spacer for left side to balance the layout */}
+                  <div style={{ width: "8vw" }}></div>
+                  
+                  {/* Centered Title */}
+                  <h1 className="header-mobile-title text-white font-bold underline text-center flex-grow" 
+                      style={{ fontSize: "1.9vw" }}>
                     SteamDream
                   </h1>
-                  {/* Filter button positioned absolutely on the right */}
-                  <div className="filter-button-mobile absolute right-8">
+                  
+                  {/* Filter Button - Right Side */}
+                  <div className="flex-shrink-0">
                     <FilterButton 
                       games={games}
                       onFilterChange={setFilters}
@@ -402,25 +402,27 @@ function App() {
                   </div>
                 </div>
               </div>
+              
+              {/* Main Content Area */}
               <div className="max-w-[90%] mx-auto min-h-screen">
-                <div className="cards-mobile-padding pt-[14vw] space-y-12 pb-8 flex flex-col items-start">
+                <div className="cards-mobile-padding pt-[15vw] flex flex-col items-start" style={{ paddingBottom: '2vw', gap: '3vw' }}>
                   {/* Search indicator */}
                   {searching && (
-                    <div className="w-full text-center py-2">
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: colors.primaryBtn + '20', border: `1px solid ${colors.primaryBtn}` }}>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <div className="w-full text-center" style={{ paddingTop: '0.5vw', paddingBottom: '0.5vw' }}>
+                      <div className="inline-flex items-center" style={{ backgroundColor: colors.primaryBtn + '20', border: `1px solid ${colors.primaryBtn}`, gap: '0.5vw', paddingLeft: '1vw', paddingRight: '1vw', paddingTop: '0.5vw', paddingBottom: '0.5vw', borderRadius: '0.5vw' }}>
+                        <div className="animate-spin rounded-full border-2 border-white border-t-transparent" style={{ height: '1vw', width: '1vw' }}></div>
                         <span className="text-white text-sm">Searching...</span>
                       </div>
                     </div>
                   )}
                   
                   {loading ? (
-                    <div className="text-center py-12 w-full">
-                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#66C0F4] border-t-transparent"></div>
-                      <p className="text-white/70 mt-4">Loading games...</p>
+                    <div className="text-center w-full" style={{ paddingTop: '3vw', paddingBottom: '3vw' }}>
+                      <div className="inline-block animate-spin rounded-full border-4 border-[#66C0F4] border-t-transparent" style={{ height: '3vw', width: '3vw' }}></div>
+                      <p className="text-white/70" style={{ marginTop: '1vw' }}>Loading games...</p>
                     </div>
                   ) : games.length === 0 ? (
-                    <div className="text-center py-12 w-full">
+                    <div className="text-center w-full" style={{ paddingTop: '3vw', paddingBottom: '3vw' }}>
                       <p className="text-white/70">No games found in database.</p>
                     </div>
                   ) : (
@@ -453,17 +455,22 @@ function App() {
                 </div>
                 
                 {/* Pagination Controls at Bottom of Page */}
-                <div className="flex justify-center items-center gap-4 w-full py-8">
+                <div className="flex justify-center items-center w-full" style={{ paddingTop: '2vw', paddingBottom: '2vw', gap: '1vw' }}>
                   <button
                       onClick={() => {
                         setCurrentPage(prev => Math.max(1, prev - 1));
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       disabled={currentPage === 1}
-                      className="px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ 
                         backgroundColor: currentPage === 1 ? colors.background : colors.primaryBtn,
-                        color: 'white'
+                        color: 'white',
+                        paddingLeft: '1.5vw',
+                        paddingRight: '1.5vw',
+                        paddingTop: '0.8vw',
+                        paddingBottom: '0.8vw',
+                        borderRadius: '0.5vw'
                       }}
                       onMouseEnter={(e) => currentPage !== 1 && (e.currentTarget.style.backgroundColor = colors.primaryBtnHover)}
                       onMouseLeave={(e) => currentPage !== 1 && (e.currentTarget.style.backgroundColor = colors.primaryBtn)}
@@ -481,10 +488,15 @@ function App() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       disabled={currentPage >= Math.ceil(totalGames / gamesPerPage)}
-                      className="px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ 
                         backgroundColor: currentPage >= Math.ceil(totalGames / gamesPerPage) ? colors.background : colors.primaryBtn,
-                        color: 'white'
+                        color: 'white',
+                        paddingLeft: '1.5vw',
+                        paddingRight: '1.5vw',
+                        paddingTop: '0.8vw',
+                        paddingBottom: '0.8vw',
+                        borderRadius: '0.5vw'
                       }}
                       onMouseEnter={(e) => currentPage < Math.ceil(totalGames / gamesPerPage) && (e.currentTarget.style.backgroundColor = colors.primaryBtnHover)}
                       onMouseLeave={(e) => currentPage < Math.ceil(totalGames / gamesPerPage) && (e.currentTarget.style.backgroundColor = colors.primaryBtn)}

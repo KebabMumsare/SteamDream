@@ -38,34 +38,34 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onClose, colors }
       }}
     >
       <button
-        className="mb-2 text-4xl font-bold text-white self-end pr-2 rounded-xl shadow-md"
+        className="mb-2 text-4xl font-bold text-white self-end pr-2 shadow-md"
         onClick={onClose}
         aria-label="Close menu"
-        style={{ lineHeight: 1, backgroundColor: colors.primaryBtn, padding: '0.2em 0.7em' }}
+        style={{ lineHeight: 1, backgroundColor: colors.primaryBtn, padding: '0.2em 0.7em', borderRadius: '1vw' }}
       >
         ×
       </button>
       <div className="w-full flex flex-col items-center mt-2">
         <div className="text-white text-3xl font-extrabold mb-6 underline" style={{ letterSpacing: 1 }}>Menu</div>
         <button
-          className="w-full flex items-center gap-4 text-white font-extrabold text-2xl rounded-xl py-3 px-6 mb-6 shadow-md"
-          style={{ backgroundColor: colors.primaryBtn }}
+          className="w-full flex items-center gap-4 text-white font-extrabold text-2xl py-3 px-6 mb-6 shadow-md"
+          style={{ backgroundColor: colors.primaryBtn, borderRadius: '1vw' }}
           onClick={() => { navigate('/'); onClose(); }}
         >
           <img src="/assets/Icons/Home.png" alt="Home" style={{ width: 38, height: 38 }} />
           <span className="text-white underline">Home</span>
         </button>
         <button
-          className="w-full flex items-center gap-4 text-white font-extrabold text-2xl rounded-xl py-3 px-6 mb-6 shadow-md"
-          style={{ backgroundColor: colors.primaryBtn }}
+          className="w-full flex items-center gap-4 text-white font-extrabold text-2xl py-3 px-6 mb-6 shadow-md"
+          style={{ backgroundColor: colors.primaryBtn, borderRadius: '1vw' }}
           onClick={() => { navigate('/favorite'); onClose(); }}
         >
           <img src="/assets/Icons/Bookmark.gif" alt="Favorites" style={{ width: 38, height: 38 }} />
           <span className="text-white underline">Favorites</span>
         </button>
         <button
-          className="w-full flex items-center gap-4 text-white font-extrabold text-2xl rounded-xl py-3 px-6 shadow-md"
-          style={{ backgroundColor: colors.primaryBtn }}
+          className="w-full flex items-center gap-4 text-white font-extrabold text-2xl py-3 px-6 shadow-md"
+          style={{ backgroundColor: colors.primaryBtn, borderRadius: '1vw' }}
           onClick={handleProfileClick}
         >
           <img src="/assets/Icons/Profile.gif" alt="Profile" style={{ width: 38, height: 38 }} />

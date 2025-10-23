@@ -81,20 +81,25 @@ function FilterButton({ games, onFilterChange, colors }: FilterProps) {
       {/* Filter Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="rounded-lg font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl flex items-center px-4 py-2 text-base md:px-[1vw] md:py-[0.5vw] md:text-[1vw]"
+        className="rounded-full font-semibold text-white transition-all duration-200 shadow-lg hover:shadow-xl flex items-center"
         style={{
           backgroundColor: colors.primaryBtn,
-          gap: '0.5rem',
+          gap: '0.5vw',
+          paddingLeft: '1vw',
+          paddingRight: '1vw',
+          paddingTop: '0.5vw',
+          paddingBottom: '0.5vw',
+          fontSize: '1vw'
         }}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
       >
-        <svg className="w-5 h-5 md:w-[1.5vw] md:h-[1.5vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '1.5vw', height: '1.5vw' }}>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
         Filter
         {activeFilterCount > 0 && (
-          <span className="bg-white text-gray-800 rounded-full font-bold ml-2 px-2 py-0.5 text-xs md:ml-[0.5vw] md:px-[0.5vw] md:py-[0.2vw] md:text-[1vw]">
+          <span className="bg-white text-gray-800 rounded-full font-bold" style={{ marginLeft: '0.5vw', paddingLeft: '0.5vw', paddingRight: '0.5vw', paddingTop: '0.1vw', paddingBottom: '0.1vw', fontSize: '0.8vw' }}>
             {activeFilterCount}
           </span>
         )}
@@ -111,152 +116,144 @@ function FilterButton({ games, onFilterChange, colors }: FilterProps) {
           
           {/* Filter Content */}
           <div 
-            className="filter-panel absolute top-full rounded-lg shadow-2xl z-50 max-h-[70vh] overflow-y-auto mt-2 right-0"
+            className="filter-panel absolute top-full shadow-2xl z-50 overflow-y-auto"
             style={{ 
-              backgroundColor: colors.headerBg,
-              width: '90vw',
-              maxWidth: '500px',
+              backgroundColor: '#004E7B',
+              width: '30vw',
+              maxHeight: '70vh',
+              marginTop: '0.5vw',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              right: '0',
+              minWidth: '20vw',
+              borderRadius: '0.5vw'
             }}
           >
-            <div className="p-6 md:p-4">
+            <div style={{ padding: '2vw' }}>
               {/* Header */}
-              <div className="flex justify-between items-center mb-4 md:mb-3">
-                <h3 className="font-bold text-white text-xl md:text-lg">Filters</h3>
+              <div className="flex justify-between items-center" style={{ marginBottom: '1.5vw' }}>
+                <h3 className="font-bold text-white" style={{ fontSize: '1.5vw' }}>Filters</h3>
                 <button
                   onClick={resetFilters}
-                  className="text-white/70 hover:text-white transition-colors text-sm"
+                  className="text-white hover:text-white/80 transition-colors"
+                  style={{ 
+                    fontSize: '0.9vw',
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    padding: '0.5vw 1vw',
+                    borderRadius: '0.5vw'
+                  }}
                 >
                   Reset All
                 </button>
               </div>
 
               {/* Discount Filter */}
-              <div className="mb-4 md:mb-3">
-                <label className="block text-white font-semibold mb-2 text-base md:text-sm">
+              <div style={{ marginBottom: '1.5vw' }}>
+                <label className="block text-white font-semibold" style={{ marginBottom: '1vw', fontSize: '1vw' }}>
                   Discount Percentage
                 </label>
-                <div className="flex flex-col gap-3 md:gap-2">
-                  <div className="flex items-center gap-3 md:gap-2">
-                    <div className="flex-1">
-                      <label className="text-white/70 text-sm md:text-xs">Min: {filters.discountMin}%</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={filters.discountMin}
-                        onChange={(e) => handleDiscountChange(Number(e.target.value), filters.discountMax)}
-                        className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${filters.discountMin}%, #374151 ${filters.discountMin}%, #374151 100%)`
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-white/70 text-sm md:text-xs">Max: {filters.discountMax}%</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={filters.discountMax}
-                        onChange={(e) => handleDiscountChange(filters.discountMin, Number(e.target.value))}
-                        className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${filters.discountMax}%, #374151 ${filters.discountMax}%, #374151 100%)`
-                        }}
-                      />
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between" style={{ gap: '1vw', marginBottom: '0.5vw' }}>
+                  <span className="text-white/70" style={{ fontSize: '0.9vw' }}>Min: {filters.discountMin}%</span>
+                  <span className="text-white/70" style={{ fontSize: '0.9vw' }}>Max: {filters.discountMax}%</span>
+                </div>
+                <div className="flex items-center" style={{ gap: '1vw' }}>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={filters.discountMin}
+                    onChange={(e) => handleDiscountChange(Number(e.target.value), filters.discountMax)}
+                    className="flex-1 h-2 appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${filters.discountMin}%, rgba(255,255,255,0.2) ${filters.discountMin}%, rgba(255,255,255,0.2) 100%)`,
+                      borderRadius: '0.5vw'
+                    }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={filters.discountMax}
+                    onChange={(e) => handleDiscountChange(filters.discountMin, Number(e.target.value))}
+                    className="flex-1 h-2 appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${filters.discountMax}%, rgba(255,255,255,0.2) ${filters.discountMax}%, rgba(255,255,255,0.2) 100%)`,
+                      borderRadius: '0.5vw'
+                    }}
+                  />
                 </div>
               </div>
 
               {/* Price Filter */}
-              <div className="mb-4 md:mb-3">
-                <label className="block text-white font-semibold mb-2 text-base md:text-sm">
+              <div style={{ marginBottom: '1.5vw' }}>
+                <label className="block text-white font-semibold" style={{ marginBottom: '1vw', fontSize: '1vw' }}>
                   Current Price (€)
                 </label>
-                <div className="flex flex-col gap-3 md:gap-2">
-                  <div className="flex items-center gap-3 md:gap-2">
-                    <div className="flex-1">
-                      <label className="text-white/70 text-sm md:text-xs">Min: €{filters.priceMin}</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1000"
-                        step="10"
-                        value={filters.priceMin}
-                        onChange={(e) => handlePriceChange(Number(e.target.value), filters.priceMax)}
-                        className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${(filters.priceMin / 1000) * 100}%, #374151 ${(filters.priceMin / 1000) * 100}%, #374151 100%)`
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-white/70 text-sm md:text-xs">Max: €{filters.priceMax}</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1000"
-                        step="10"
-                        value={filters.priceMax}
-                        onChange={(e) => handlePriceChange(filters.priceMin, Number(e.target.value))}
-                        className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${(filters.priceMax / 1000) * 100}%, #374151 ${(filters.priceMax / 1000) * 100}%, #374151 100%)`
-                        }}
-                      />
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between" style={{ gap: '1vw', marginBottom: '0.5vw' }}>
+                  <span className="text-white/70" style={{ fontSize: '0.9vw' }}>Min: €{filters.priceMin}</span>
+                  <span className="text-white/70" style={{ fontSize: '0.9vw' }}>Max: €{filters.priceMax}</span>
+                </div>
+                <div className="flex items-center" style={{ gap: '1vw' }}>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    step="10"
+                    value={filters.priceMin}
+                    onChange={(e) => handlePriceChange(Number(e.target.value), filters.priceMax)}
+                    className="flex-1 h-2 appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${(filters.priceMin / 1000) * 100}%, rgba(255,255,255,0.2) ${(filters.priceMin / 1000) * 100}%, rgba(255,255,255,0.2) 100%)`,
+                      borderRadius: '0.5vw'
+                    }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    step="10"
+                    value={filters.priceMax}
+                    onChange={(e) => handlePriceChange(filters.priceMin, Number(e.target.value))}
+                    className="flex-1 h-2 appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${colors.primaryBtn} 0%, ${colors.primaryBtn} ${(filters.priceMax / 1000) * 100}%, rgba(255,255,255,0.2) ${(filters.priceMax / 1000) * 100}%, rgba(255,255,255,0.2) 100%)`,
+                      borderRadius: '0.5vw'
+                    }}
+                  />
                 </div>
               </div>
 
               {/* Genre Filter */}
               <div>
-                <label className="block text-white font-semibold mb-2 text-base md:text-sm">
+                <label className="block text-white font-semibold" style={{ marginBottom: '1vw', fontSize: '1vw' }}>
                   Genres / Tags ({filters.selectedGenres.length} selected)
                 </label>
-                <div className="overflow-y-auto bg-white/5 rounded-lg p-3 md:p-2 flex flex-col gap-2 md:gap-1 max-h-48 md:max-h-60">
+                <div className="overflow-y-auto flex flex-col" style={{ padding: '1vw', gap: '0.5vw', maxHeight: '15vw', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '0.5vw' }}>
                   {allGenres.length > 0 ? (
                     allGenres.map((genre) => (
                       <label
                         key={genre}
-                        className="flex items-center cursor-pointer hover:bg-white/10 rounded transition-colors gap-3 md:gap-2 p-2 md:p-1.5"
+                        className="flex items-center cursor-pointer hover:bg-white/10 transition-colors"
+                        style={{ gap: '0.8vw', padding: '0.5vw', borderRadius: '0.3vw' }}
                       >
                         <input
                           type="checkbox"
                           checked={filters.selectedGenres.includes(genre)}
                           onChange={() => toggleGenre(genre)}
-                          className="rounded cursor-pointer w-4 h-4"
-                          style={{ accentColor: colors.primaryBtn }}
+                          className="rounded cursor-pointer"
+                          style={{ accentColor: colors.primaryBtn, width: '1vw', height: '1vw' }}
                         />
-                        <span className="text-white text-sm md:text-xs">{genre}</span>
+                        <span className="text-white" style={{ fontSize: '0.9vw' }}>{genre}</span>
                       </label>
                     ))
                   ) : (
-                    <p className="text-white/50 text-center text-sm md:text-xs p-3 md:p-2">No genres available</p>
+                    <p className="text-white/50 text-center" style={{ padding: '1vw', fontSize: '0.9vw' }}>No genres available</p>
                   )}
                 </div>
               </div>
-
-              {/* Active Filters Summary */}
-              {activeFilterCount > 0 && (
-                <div className="border-t border-white/20 mt-4 pt-3 md:mt-3 md:pt-2">
-                  <p className="text-white/70 text-sm md:text-xs">
-                    {activeFilterCount} active filter{activeFilterCount !== 1 ? 's' : ''}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </>
       )}
-      <style>{`
-        @media (max-width: 500px) {
-          .filter-panel {
-            right: -30vw !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

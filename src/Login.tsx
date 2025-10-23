@@ -57,16 +57,18 @@ function Login() {
         `}
       </style>
       <div
-        className="bg-[#1B2838] rounded-2xl shadow-lg p-10 flex flex-col items-center w-full mt-32 loginbox"
+        className="bg-[#1B2838] rounded-2xl shadow-lg flex flex-col items-center w-full mt-32 loginbox"
+        style={{ padding: '2.5vw' }}
       > 
         <h2
-          className="font-bold text-white mb-8 login-title"
+          className="font-bold text-white login-title"
+          style={{ marginBottom: '2vw' }}
         >
           Login with steam
         </h2>
-        <form className="flex flex-col gap-3 items-center">
+        <form className="flex flex-col items-center" style={{ gap: '0.8vw' }}>
           <a href="/auth/steam">
-            <div className="border-2 border-[#FFFFFF] rounded-full p-2 bg-transparent flex items-center justify-center">
+            <div className="border-2 border-[#FFFFFF] rounded-full bg-transparent flex items-center justify-center" style={{ padding: '0.5vw' }}>
               <img
                 src="/assets/Icons/SteamLogin.png"
                 alt="Login with Steam"
@@ -75,7 +77,7 @@ function Login() {
             </div>
           </a>
         </form>
-      <h3 className="mt-8 text-center login-desc">Log in to see your owned steam games and change the theme on the website</h3>
+      <h3 className="text-center login-desc" style={{ marginTop: '2vw' }}>Log in to see your owned steam games and change the theme on the website</h3>
       </div>
     </div>
   );

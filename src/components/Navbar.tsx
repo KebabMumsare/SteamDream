@@ -49,22 +49,32 @@ function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
     <>
       <style>{mobilePlaceholderStyle}</style>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 mt-[3%] py-3 px-8 shadow flex items-center justify-between text-white rounded-full w-[90vw] mx-auto"
-        style={{ backgroundColor: colors.background }}
+        className="fixed top-0 z-50 mt-[3%] shadow flex items-center text-white rounded-full w-[90vw] mx-auto"
+        style={{ 
+          backgroundColor: colors.background, 
+          paddingTop: '0.8vw', 
+          paddingBottom: '0.8vw', 
+          paddingLeft: '2vw', 
+          paddingRight: '2vw',
+          left: '50%',
+          transform: 'translateX(-50%)'
+        }}
       >
       {/* Desktop: show logo, search, bookmark, profile */}
-      <span
-        className="font-bold text-xl tracking-wide rounded-full px-4 py-2 flex items-center justify-center cursor-pointer max-[450px]:hidden"
-        style={{ backgroundColor: colors.background }}
-        onClick={() => navigate("/")}
-      >
-        <img
-          src="/assets/Icons/Logo.png"
-          alt="Logo"
-          className="object-contain"
-          style={{ width: '7vw', height: '3vw', minWidth: '40px', minHeight: '24px' }}
-        />
-      </span>
+      <div style={{ width: '12vw', display: 'flex', justifyContent: 'flex-start' }}>
+        <span
+          className="font-bold text-xl tracking-wide rounded-full flex items-center justify-center cursor-pointer max-[450px]:hidden"
+          style={{ backgroundColor: colors.background, paddingLeft: '1vw', paddingRight: '1vw', paddingTop: '0.5vw', paddingBottom: '0.5vw' }}
+          onClick={() => navigate("/")}
+        >
+          <img
+            src="/assets/Icons/Logo.png"
+            alt="Logo"
+            className="object-contain"
+            style={{ width: '7vw', height: '3vw', minWidth: '2.5vw', minHeight: '1.5vw' }}
+          />
+        </span>
+      </div>
       <div className="flex-1 flex justify-center">
         <div
           className="relative w-[36vw] max-[450px]:w-[60vw]"
@@ -96,15 +106,16 @@ function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
               paddingTop: "1.5vw",
               paddingBottom: "1.2vw",
               fontSize: "1.3vw",
-              minHeight: '48px',
+              minHeight: '3vw',
              
             }}
           />
         </div>
       </div>
       {/* Desktop: show bookmark/profile, mobile: show hamburger */}
-      <ul className="flex gap-8 items-center max-[450px]:hidden">
-        <li>
+      <div style={{ width: '12vw', display: 'flex', justifyContent: 'flex-end' }}>
+        <ul className="flex items-center max-[450px]:hidden list-none" style={{ gap: '2vw' }}>
+          <li>
           <div
             className="rounded-full flex items-center justify-center cursor-pointer transition delay-150 duration-300 ease-in-out hover:-translate-y-1"
             style={{
@@ -147,14 +158,15 @@ function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
           </div>
         </li>
       </ul>
+      </div>
       {/* Mobile: hide logo, show hamburger menu to right */}
       <button
-        className="min-[451px]:hidden flex items-center justify-center ml-2 bg-transparent"
-        style={{ background: 'none', boxShadow: 'none' }}
+        className="min-[451px]:hidden flex items-center justify-center bg-transparent"
+        style={{ background: 'none', boxShadow: 'none', marginLeft: '0.5vw' }}
         aria-label="Open menu"
         onClick={() => setMenuOpen(true)}
       >
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="2.5vw" height="2.5vw" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="6" x2="21" y2="6"/>
           <line x1="3" y1="18" x2="21" y2="18"/>

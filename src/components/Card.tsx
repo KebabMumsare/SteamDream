@@ -94,8 +94,16 @@ function Card({
   return (
     <div
       onClick={steamsite}
-      className="cursor-pointer hover:scale-[1.01] transition-transform mt-6 w-[90%] mx-auto max-w-[1600px] rounded-[1.5vw] grid gap-[1.2vw] sm:grid-cols-1 md:grid-cols-[16vw_1fr] lg:grid-cols-[16vw_1fr_20vw]"
-      style={{ padding: '1vw', backgroundColor: colors.background }}
+      className="cursor-pointer hover:scale-[1.01] transition-transform w-[90%] mx-auto rounded-[1.5vw]"
+      style={{ 
+        padding: '1vw', 
+        backgroundColor: colors.background, 
+        marginTop: '1.5vw', 
+        maxWidth: '100vw',
+        display: 'grid',
+        gap: '1.2vw',
+        gridTemplateColumns: 'minmax(16vw, 16vw) 1fr minmax(20vw, 20vw)'
+      }}
     >
       {/* Image */}
       <div className="relative aspect-[18/12] rounded-[1.4vw] overflow-hidden bg-black/30">
@@ -113,7 +121,7 @@ function Card({
             onClick={Favknapp}
             aria-pressed={fav}
             className="inline-flex items-center justify-center p-0 rounded-[0.8vw] hover:scale-105 transition focus:outline-none focus-visible:ring-2"
-            style={{ '--tw-ring-color': `${colors.primaryBtn}60` } as any}
+            style={{ backgroundColor: colors.primaryBtn } as any}
           >
             <img
               src={fav ? gul : star}
@@ -143,7 +151,7 @@ function Card({
             
             {/* Discount Badge - only show if discount is greater than 0 */}
             {discountPercent !== undefined && discountPercent > 0 && (
-              <span className="bg-[#44CE3F] text-white rounded-md leading-none shadow" style={{ padding: '0.4vw 0.6vw', fontSize: '0.75vw' }}>
+              <span className="bg-[#44CE3F] text-white leading-none shadow" style={{ padding: '0.4vw 0.6vw', fontSize: '0.75vw', borderRadius: '0.4vw' }}>
                 -{discountPercent}%
               </span> 
             )}
@@ -152,7 +160,7 @@ function Card({
 
         {/* Genre + Platforms */}
         <div className="flex flex-wrap items-center" style={{ gap: '0.8vw' }}>
-          <div className="inline-flex items-center text-white rounded-lg font-semibold w-max shadow" style={{ fontSize: '0.7vw', padding: '0.4vw 0.6vw', backgroundColor: colors.primaryBtn }}>
+          <div className="inline-flex items-center text-white font-semibold w-max shadow" style={{ fontSize: '0.7vw', padding: '0.4vw 0.6vw', backgroundColor: colors.primaryBtn, borderRadius: '0.5vw' }}>
             {genre}
           </div>
           {platforms?.windows && <img src={windows} alt="Windows" className="object-contain" style={{ width: '1.5vw', height: '1.5vw' }} />}
@@ -164,7 +172,7 @@ function Card({
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap" style={{ gap: '0.5vw' }}>
             {tags.map((tag, index) => (
-              <span key={index} className="rounded-md bg-[#44CE3F]/15 text-[#44CE3F] tracking-wide" style={{ padding: '0.3vw 0.5vw', fontSize: '0.7vw' }}>
+              <span key={index} className="bg-[#44CE3F]/15 text-[#44CE3F] tracking-wide" style={{ padding: '0.3vw 0.5vw', fontSize: '0.7vw', borderRadius: '0.4vw' }}>
                 {tag}
               </span>
             ))}
@@ -173,8 +181,8 @@ function Card({
       </div>
 
       {/* Description panel */}
-      <div className="relative text-white/90 backdrop-blur-sm border border-white/10 rounded-lg leading-relaxed shadow-inner shadow-black/40 overflow-auto scrollbar-thin scrollbar-track-transparent" style={{ padding: '0.8vw', fontSize: '0.75vw', maxHeight: '20vw', backgroundColor: colors.primaryBtn, scrollbarColor: `${colors.primaryBtn}40 transparent` }}>
-        <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ backgroundColor: `${colors.primaryBtn}0D` }} />
+      <div className="relative text-white/90 backdrop-blur-sm border border-white/10 leading-relaxed shadow-inner shadow-black/40 overflow-auto scrollbar-thin scrollbar-track-transparent" style={{ padding: '0.8vw', fontSize: '0.75vw', maxHeight: '20vw', backgroundColor: colors.primaryBtn, scrollbarColor: `${colors.primaryBtn}40 transparent`, borderRadius: '0.5vw' }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: `${colors.primaryBtn}0D`, borderRadius: '0.5vw' }} />
         <p className="relative z-10">
           {truncatedDescription}
         </p>

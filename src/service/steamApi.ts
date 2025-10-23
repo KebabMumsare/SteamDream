@@ -25,7 +25,9 @@ async function fetchAPI(endpoint: string) {
       errorMessage = `${response.status}: ${response.statusText}`;
     }
     console.error('❌ API Error:', errorMessage);
-    throw new Error(errorMessage);
+    const error: any = new Error(errorMessage);
+    error.status = response.status; // Attach status code to error object
+    throw error;
   }
   
   // Check if response is JSON
