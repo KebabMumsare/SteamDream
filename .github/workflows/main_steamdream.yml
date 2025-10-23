@@ -30,9 +30,10 @@ jobs:
           npm install --production=false
           npm run build
 
-      - name: Install production dependencies
+      - name: Install production dependencies only
         run: |
-          npm ci --production
+          rm -rf node_modules
+          npm ci --omit=dev
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -43,7 +44,10 @@ jobs:
             node_modules/
             server.js
             package.json
+            package-lock.json
             web.config
+            ecosystem.config.cjs
+            startup.sh
 
   deploy:
     runs-on: ubuntu-latest
