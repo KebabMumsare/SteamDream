@@ -18,8 +18,10 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Initialize SQLite database
-const db = new Database(path.join(__dirname, 'SteamDream.db'));
-console.log('✅ Database connected:', path.join(__dirname, 'SteamDream.db'));
+// In production, compiled code is in dist/ folder, so database is one level up
+const dbPath = path.join(__dirname, '..', 'SteamDream.db');
+const db = new Database(dbPath);
+console.log('✅ Database connected:', dbPath);
 
 // Create favorites table if it doesn't exist
 db.exec(`
