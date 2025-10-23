@@ -126,7 +126,7 @@ app.get(
     console.log('Full User Object:', JSON.stringify(user, null, 2));
     console.log('Session ID:', req.sessionID);
     console.log('=====================================\n');
-    res.redirect('/profile');
+    res.redirect('https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net/profile');
   }
 );
 
