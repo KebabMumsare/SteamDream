@@ -58,9 +58,6 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Serve static files from Frontend/dist
-app.use(express.static(path.join(__dirname, '../Frontend/dist')));
-
 // Session configuration - CRITICAL for passport-steam with ngrok
 app.use(
   session({
@@ -837,11 +834,6 @@ app.put('/api/preferences', (req, res) => {
     console.error('   ❌ Error saving preferences:', error);
     res.status(500).json({ error: 'Failed to save preferences' });
   }
-});
-
-// Serve React app for all other routes (must be last!)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
 });
 
 const PORT = process.env.PORT ?? 3000;
