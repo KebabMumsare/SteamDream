@@ -352,13 +352,13 @@ app.get('/api/games', (req, res) => {
     const totalCount = db.prepare(`SELECT COUNT(*) as count FROM steam_games`).get() as any;
     const cappedCount = Math.min(totalCount.count, MAX_GAMES);
     
-    // Fetch only the games we need for this page
+    // Fetch only the games we need for this page, extracting key fields in SQL
     const games = db.prepare(`
       SELECT 
         appid,
         name,
         type,
-        extra_data,
+             extra_data,
         CAST(
           COALESCE(
             json_extract(extra_data, '$.price_overview.discount_percent'),
@@ -370,36 +370,32 @@ app.get('/api/games', (req, res) => {
       LIMIT ? OFFSET ?
     `).all(adjustedLimit, offset) as any[];
 
-    // Parse extra_data JSON only for the games we're returning
+    // Parse only genres/categories JSON arrays, rest is direct
     const parsedGames = games.map(game => {
-      const gameData: any = {
+       let gameData: any = {
         appid: game.appid,
         name: game.name,
-        type: game.type,
-        discount_percent: game.discount_percent || 0,
-        price_before_discount: 0,
-        price_after_discount: 0,
-        image_url: undefined,
-        platforms: {},
-        tags: [],
-        categories: [],
-        description: ''
+        type: game.type
       };
-
-      try {
+       try {
         if (game.extra_data && typeof game.extra_data === 'string') {
           const extraData = JSON.parse(game.extra_data);
-
+          
+          // Extract price information
           if (extraData.price_overview) {
-            gameData.price_before_discount = extraData.price_overview.initial / 100;
+            gameData.price_before_discount = extraData.price_overview.initial / 100; // Convert cents to dollars
             gameData.price_after_discount = extraData.price_overview.final / 100;
             gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0; // Free game
+            gameData.discount_percent = 0;
           }
-
+          
+          // Extract other fields (use header_image like favorites endpoint)
           if (extraData.header_image) {
             gameData.image_url = extraData.header_image;
           }
-
+          
           gameData.platforms = extraData.platforms || {};
           gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
           gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
@@ -408,9 +404,11 @@ app.get('/api/games', (req, res) => {
       } catch (e) {
         console.error(`Error parsing game ${game.appid}:`, e);
       }
-
+      
       return gameData;
     });
+
+   
 
     res.json({
       count: cappedCount, // Total count capped at 1000
