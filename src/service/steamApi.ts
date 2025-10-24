@@ -131,10 +131,28 @@ export async function checkAuth(): Promise<boolean> {
 export async function logout() {
   try {
     console.log('🚪 Logging out...');
-    // Redirect to the logout endpoint which will clear the session
-    window.location.href = '/auth/logout';
+    // Call the backend logout endpoint
+    const response = await fetch(`${BACKEND_BASE}/auth/logout`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (response.ok || response.redirected) {
+      console.log('✅ Logout successful, redirecting...');
+      // Clear any local data
+      localStorage.clear();
+      sessionStorage.clear();
+      // Redirect to home page
+      window.location.href = '/';
+    } else {
+      console.error('❌ Logout failed:', response.status);
+      // Still redirect to home on failure
+      window.location.href = '/';
+    }
   } catch (error) {
     console.error('❌ Logout error:', error);
+    // Still try to redirect home
+    window.location.href = '/';
   }
 }
 
