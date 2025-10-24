@@ -352,40 +352,64 @@ app.get('/api/games', (req, res) => {
     const totalCount = db.prepare(`SELECT COUNT(*) as count FROM steam_games`).get() as any;
     const cappedCount = Math.min(totalCount.count, MAX_GAMES);
     
-    // Fetch only the games we need for this page, extracting key fields in SQL
+    // Fetch only the games we need for this page
     const games = db.prepare(`
       SELECT 
         appid,
         name,
         type,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.initial'), 0) AS INTEGER) AS price_before_discount,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.final'), 0) AS INTEGER) AS price_after_discount,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.discount_percent'), 0) AS INTEGER) AS discount_percent,
-        json_extract(extra_data, '$.header_image') AS image_url,
-        json_extract(extra_data, '$.platforms') AS platforms,
-        json_extract(extra_data, '$.genres') AS genres,
-        json_extract(extra_data, '$.categories') AS categories,
-        COALESCE(json_extract(extra_data, '$.short_description'), json_extract(extra_data, '$.detailed_description'), '') AS description
+        extra_data,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent
       FROM steam_games 
       ORDER BY discount_percent DESC, appid DESC
       LIMIT ? OFFSET ?
-    `).all(adjustedLimit, offset);
+    `).all(adjustedLimit, offset) as any[];
 
-    // Parse only genres/categories JSON arrays, rest is direct
+    // Parse extra_data JSON only for the games we're returning
     const parsedGames = games.map(game => {
-      return {
+      const gameData: any = {
         appid: game.appid,
         name: game.name,
         type: game.type,
-        price_before_discount: game.price_before_discount / 100,
-        price_after_discount: game.price_after_discount / 100,
-        discount_percent: game.discount_percent,
-        image_url: game.image_url,
-        platforms: game.platforms ? JSON.parse(game.platforms) : {},
-        tags: game.genres ? JSON.parse(game.genres).map((g: any) => g.description) : [],
-        categories: game.categories ? JSON.parse(game.categories).map((c: any) => c.description) : [],
-        description: game.description || ''
+        discount_percent: game.discount_percent || 0,
+        price_before_discount: 0,
+        price_after_discount: 0,
+        image_url: undefined,
+        platforms: {},
+        tags: [],
+        categories: [],
+        description: ''
       };
+
+      try {
+        if (game.extra_data && typeof game.extra_data === 'string') {
+          const extraData = JSON.parse(game.extra_data);
+
+          if (extraData.price_overview) {
+            gameData.price_before_discount = extraData.price_overview.initial / 100;
+            gameData.price_after_discount = extraData.price_overview.final / 100;
+            gameData.discount_percent = extraData.price_overview.discount_percent;
+          }
+
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+
+          gameData.platforms = extraData.platforms || {};
+          gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
+          gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
+          gameData.description = extraData.short_description || extraData.detailed_description || '';
+        }
+      } catch (e) {
+        console.error(`Error parsing game ${game.appid}:`, e);
+      }
+
+      return gameData;
     });
 
     res.json({
