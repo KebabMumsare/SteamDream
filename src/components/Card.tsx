@@ -114,7 +114,7 @@ function Card({
       <div className="flex flex-col" style={{ gap: '0.8vw' }}>
         {/* Title + Favorite */}
         <div className="flex items-center" style={{ gap: '0.6vw' }}>
-          <h2 className="font-semibold rounded-[0.8vw] flex items-center w-max text-white shadow-sm" style={{ fontSize: '1.2vw', padding: '0.6vw 1vw', height: '2.8vw', backgroundColor: colors.primaryBtn }}>
+          <h2 className="font-semibold rounded-[0.8vw] flex items-center w-max text-white shadow-sm" style={{ fontSize: '1.2vw', padding: '0.2vw 1vw', height: '2.8vw', backgroundColor: colors.primaryBtn }}>
             {truncatedTitle}
           </h2>
           <button
@@ -127,7 +127,7 @@ function Card({
               src={fav ? gul : star}
               alt={fav ? 'Favorited' : 'Add to favorites'}
               className="rounded-[0.8vw] object-contain drop-shadow-md transition-colors"
-              style={{ height: '2.8vw', width: '2.9vw', backgroundColor: colors.primaryBtn }}
+              style={{ height: '2.5vw', width: '2.5vw', backgroundColor: colors.primaryBtn }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtnHover}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primaryBtn}
             />
