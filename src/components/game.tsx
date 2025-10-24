@@ -40,53 +40,78 @@ function Game({ appid, name, playtime_forever, img_icon_url, colors }: GameProps
     
     <div
       onClick={steamsite}
-      className="cursor-pointer hover:scale-[1.01] transition-transform mt-4 w-full max-w-[95%] sm:max-w-[90%] md:max-w-[85%] min-[1000px]:max-w-[1000px] mx-auto rounded-[16px] p-3 md:p-4 flex flex-col md:flex-row gap-3 md:gap-4"
-      style={{ backgroundColor: cardBg }}
+      className="cursor-pointer hover:scale-[1.01] transition-transform"
+      style={{ 
+        backgroundColor: cardBg,
+        marginTop: '0.5vw',
+        width: '95vw',
+        maxWidth: '52vw',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        borderRadius: '0.8vw',
+        padding: '0.5vw',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '0.5vw'
+      }}
     >
-      {/* Image - shows at top on mobile/tablet, left on desktop < 1000px */}
-      <div className="relative w-full md:w-[250px] min-[1000px]:hidden aspect-[3/2] md:aspect-auto md:h-[170px] rounded-[16px] overflow-hidden bg-black/30 flex-shrink-0">
+      {/* Image - shows beside description on all screens */}
+      <div 
+        className="relative overflow-hidden bg-black/30 flex-shrink-0"
+        style={{
+          width: '15.9vw',
+          height: '10.7vw',
+          borderRadius: '0.8vw'
+        }}
+      >
         <img src={headerImage} alt="Game artwork" className="w-full h-full object-cover" onError={(e) => {
-            e.currentTarget.src = iconImage;}} />
+            e.currentTarget.src = iconImage;
+        }} />
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col gap-2 flex-1 min-w-0">
-        {/* Description and Image wrapper for > 1000px */}
-        <div className="flex flex-col min-[1000px]:flex-row gap-3 min-[1000px]:gap-4">
-          {/* Image - shows beside description on screens > 1000px (LEFT SIDE) */}
-          <div className="hidden min-[1000px]:block relative w-[305px] h-[205px] rounded-[16px] overflow-hidden bg-black/30 flex-shrink-0">
-            <img src={headerImage} alt="Game artwork" className="w-full h-full object-cover" onError={(e) => {
-                e.currentTarget.src = iconImage;
-            }} />
-          </div>
+      <div className="flex flex-col flex-1 min-w-0" style={{ gap: '0.3vw' }}>
+        {/* Title */}
+        <div className="flex items-center" style={{ gap: '0.2vw' }}>
+          <h2 
+            className="font-mono font-semibold flex items-center shadow-sm"
+            style={{ 
+              backgroundColor: titleBg, 
+              color: textColor,
+              borderRadius: '0.5vw',
+              padding: '0.3vw 0.5vw',
+              fontSize: '0.9vw',
+              height: '1.9vw',
+              width: 'max-content'
+            }}
+          >
+            {name}
+          </h2>
+        </div>
 
-          {/* Title and Description wrapper */}
-          <div className="flex flex-col gap-2 flex-1 min-w-0">
-            {/* Title */}
-            <div className="flex items-center gap-1.5">
-              <h2 
-                className="font-mono font-semibold text-sm md:text-base lg:text-lg rounded-[10px] px-3 py-2 md:h-[36px] flex items-center w-max shadow-sm"
-                style={{ backgroundColor: titleBg, color: textColor }}
-              >
-                {name}
-              </h2>
-            </div>
-
-            {/* Description panel */}
-            <div 
-              className="relative font-mono backdrop-blur-sm border border-white/10 rounded-lg p-3 md:p-4 text-[11px] md:text-xs lg:text-sm leading-relaxed shadow-inner shadow-black/40 max-h-[150px] sm:max-h-[180px] md:max-h-[200px] max-w-[630px] overflow-auto scrollbar-thin scrollbar-thumb-white/40 scrollbar-track-white/10 md:scrollbar-none"
-              style={{ backgroundColor: descriptionBg, color: textColor }}
-            >
-              <div className="absolute inset-0 pointer-events-none rounded-lg opacity-5" style={{ backgroundColor: descriptionBg }} />
-              <p className="relative z-10">
-                <strong>Hours played:</strong> {hoursPlayed}h {minutesPlayed}m
-                <br />
-                <strong>App ID:</strong> {appid}
-                <br />
-                Click to view more about the game on Steam!
-              </p>
-            </div>
-          </div>
+        {/* Description panel */}
+        <div 
+          className="relative font-mono backdrop-blur-sm border border-white/10 overflow-auto scrollbar-thin scrollbar-thumb-white/40 scrollbar-track-white/10"
+          style={{ 
+            backgroundColor: descriptionBg, 
+            color: textColor,
+            borderRadius: '0.4vw',
+            padding: '0.5vw',
+            fontSize: '0.6vw',
+            lineHeight: '1.5',
+            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)',
+            maxHeight: '10.4vw',
+            maxWidth: '32.8vw'
+          }}
+        >
+          <div className="absolute inset-0 pointer-events-none opacity-5" style={{ backgroundColor: descriptionBg, borderRadius: '0.4vw' }} />
+          <p className="relative z-10">
+            <strong>Hours played:</strong> {hoursPlayed}h {minutesPlayed}m
+            <br />
+            <strong>App ID:</strong> {appid}
+            <br />
+            Click to view more about the game on Steam!
+          </p>
         </div>
       </div>
     </div>
