@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
@@ -51,45 +52,13 @@ const app = express();
 // Trust proxy for Azure
 app.set('trust proxy', 1);
 
-// Robust CORS configuration (allowlist + credentials)
-const allowedOrigins = [
-  'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
-  'http://localhost:5173', // Vite dev server
-  'http://localhost:3000', // In case running locally
-  'http://localhost:8080'  // Production build local test
-];
-
-// Use the cors middleware but echo the origin only when it's in our allowlist.
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow non-browser tools (curl, Postman) which don't send an Origin header
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      // Accept this origin
-      return callback(null, true);
-    }
-
-    // Reject others explicitly (browser will block)
-    console.warn(`⚠️ CORS blocked origin: ${origin}`);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  origin: [
+    'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
+    'http://localhost:5173' // Local development
+  ],
+  credentials: true
 }));
-
-// Preflight handler for all routes (ensures proper headers are returned)
-app.options('*', cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-}));
-
 app.use(express.json());
 
 // Session configuration - CRITICAL for passport-steam with ngrok
@@ -178,6 +147,7 @@ app.get('/auth/user', (req, res) => {
 });
 
 app.get('/auth/logout', (req, res) => {
+  
   console.log('\n🚪 Logout requested');
   console.log('   Session ID:', req.sessionID);
   console.log('   User:', req.user ? (req.user as any).displayName : 'None');
@@ -340,10 +310,6 @@ app.get('/api/scraper/game/:appid', (req, res) => {
 
 // Get all games with specific fields (name, price, discount, etc.)
 app.get('/api/games', (req, res) => {
-  console.log('\n📦 GET /api/games called');
-  console.log('   Origin:', req.headers.origin);
-  console.log('   Query params:', req.query);
-  
   try {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -366,13 +332,14 @@ app.get('/api/games', (req, res) => {
     const totalCount = db.prepare(`SELECT COUNT(*) as count FROM steam_games`).get() as any;
     const cappedCount = Math.min(totalCount.count, MAX_GAMES);
     
-    // Fetch only the games we need for this page, extracting key fields in SQL
+    // Fetch only the games we need for this page
+    // We'll use a subquery to extract discount_percent from JSON for sorting
     const games = db.prepare(`
       SELECT 
         appid,
         name,
         type,
-             extra_data,
+        extra_data,
         CAST(
           COALESCE(
             json_extract(extra_data, '$.price_overview.discount_percent'),
@@ -384,14 +351,15 @@ app.get('/api/games', (req, res) => {
       LIMIT ? OFFSET ?
     `).all(adjustedLimit, offset) as any[];
 
-    // Parse only genres/categories JSON arrays, rest is direct
+    // Parse extra_data JSON only for the games we're returning
     const parsedGames = games.map(game => {
-       let gameData: any = {
+      let gameData: any = {
         appid: game.appid,
         name: game.name,
         type: game.type
       };
-       try {
+
+      try {
         if (game.extra_data && typeof game.extra_data === 'string') {
           const extraData = JSON.parse(game.extra_data);
           
@@ -421,8 +389,6 @@ app.get('/api/games', (req, res) => {
       
       return gameData;
     });
-
-   
 
     res.json({
       count: cappedCount, // Total count capped at 1000
