@@ -352,46 +352,50 @@ app.get('/api/games', (req, res) => {
     const totalCount = db.prepare(`SELECT COUNT(*) as count FROM steam_games`).get() as any;
     const cappedCount = Math.min(totalCount.count, MAX_GAMES);
     
-    // Fetch only the games we need for this page, extracting price and discount with JSON functions
-    // This avoids loading the whole table into memory and pushes ordering into SQLite
+    // Fetch only the games we need for this page, extracting key fields in SQL
     const games = db.prepare(`
-      SELECT
+      SELECT 
         appid,
         name,
         type,
-        extra_data,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.final'), 0) AS INTEGER) as price_cents,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.discount_percent'), 0) AS INTEGER) as discount_percent
-      FROM steam_games
+             extra_data,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent
+      FROM steam_games 
       ORDER BY discount_percent DESC, appid DESC
       LIMIT ? OFFSET ?
     `).all(adjustedLimit, offset) as any[];
 
-    // Parse only the returned rows' JSON payloads (much fewer rows)
+    // Parse only genres/categories JSON arrays, rest is direct
     const parsedGames = games.map(game => {
-      const gameData: any = {
+       let gameData: any = {
         appid: game.appid,
         name: game.name,
-        type: game.type,
-        discount_percent: game.discount_percent || 0,
-        price_after_discount: (game.price_cents || 0) / 100
+        type: game.type
       };
-
-      try {
+       try {
         if (game.extra_data && typeof game.extra_data === 'string') {
           const extraData = JSON.parse(game.extra_data);
-
+          
+          // Extract price information
           if (extraData.price_overview) {
-            gameData.price_before_discount = extraData.price_overview.initial / 100;
-            // Prefer the pre-extracted price_cents if available
+            gameData.price_before_discount = extraData.price_overview.initial / 100; // Convert cents to dollars
             gameData.price_after_discount = extraData.price_overview.final / 100;
             gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0; // Free game
+            gameData.discount_percent = 0;
           }
-
+          
+          // Extract other fields (use header_image like favorites endpoint)
           if (extraData.header_image) {
             gameData.image_url = extraData.header_image;
           }
-
+          
           gameData.platforms = extraData.platforms || {};
           gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
           gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
@@ -400,9 +404,11 @@ app.get('/api/games', (req, res) => {
       } catch (e) {
         console.error(`Error parsing game ${game.appid}:`, e);
       }
-
+      
       return gameData;
     });
+
+   
 
     res.json({
       count: cappedCount, // Total count capped at 1000
@@ -424,49 +430,63 @@ app.get('/api/games/search', (req, res) => {
     if (!searchTerm) {
       return res.json({ count: 0, games: [] });
     }
-    // Case-insensitive search using LIKE with NOCASE collation
+
+    // Search by name (case-insensitive)
     const searchPattern = `%${searchTerm}%`;
-
-    // Get total count of matching games (name search)
+    
+    // Get total count of matching games
     const countResult = db.prepare(`
-      SELECT COUNT(*) as count
-      FROM steam_games
-      WHERE name LIKE ? COLLATE NOCASE
+      SELECT COUNT(*) as count 
+      FROM steam_games 
+      WHERE name LIKE ?
     `).get(searchPattern) as any;
-
-    // Query only the paginated subset and extract price/discount for ordering
+    
+    // Get matching games with pagination
     const games = db.prepare(`
-      SELECT
+      SELECT 
         appid,
         name,
         type,
         extra_data,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.final'), 0) AS INTEGER) as price_cents,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.discount_percent'), 0) AS INTEGER) as discount_percent
-      FROM steam_games
-      WHERE name LIKE ? COLLATE NOCASE
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent
+      FROM steam_games 
+      WHERE name LIKE ?
       ORDER BY discount_percent DESC, appid DESC
       LIMIT ? OFFSET ?
     `).all(searchPattern, limit, offset) as any[];
 
+    // Parse extra_data JSON for each matching game
     const parsedGames = games.map(game => {
-      const gameData: any = {
+      let gameData: any = {
         appid: game.appid,
         name: game.name,
-        type: game.type,
-        discount_percent: game.discount_percent || 0,
-        price_after_discount: (game.price_cents || 0) / 100
+        type: game.type
       };
 
       try {
         if (game.extra_data && typeof game.extra_data === 'string') {
           const extraData = JSON.parse(game.extra_data);
+          
+          // Extract price information
           if (extraData.price_overview) {
             gameData.price_before_discount = extraData.price_overview.initial / 100;
             gameData.price_after_discount = extraData.price_overview.final / 100;
             gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0;
+            gameData.discount_percent = 0;
           }
-          if (extraData.header_image) gameData.image_url = extraData.header_image;
+          
+          // Extract other fields
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+          
           gameData.platforms = extraData.platforms || {};
           gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
           gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
@@ -475,7 +495,7 @@ app.get('/api/games/search', (req, res) => {
       } catch (e) {
         console.error(`Error parsing game ${game.appid}:`, e);
       }
-
+      
       return gameData;
     });
 
@@ -502,70 +522,91 @@ app.get('/api/games/filter', (req, res) => {
 
     console.log('Filter params:', { discountMin, discountMax, priceMin, priceMax, genres });
 
-    // Build SQL filters to let SQLite do the heavy lifting (faster than JS filtering over entire table)
-    let whereClauses: string[] = [];
-    const params: any[] = [];
-
-    // Discount range filter
-    whereClauses.push(`CAST(COALESCE(json_extract(extra_data, '$.price_overview.discount_percent'), 0) AS INTEGER) BETWEEN ? AND ?`);
-    params.push(discountMin, discountMax);
-
-    // Price range filter (price stored in cents in JSON)
-    // We'll compare the extracted cents divided by 100 against min/max
-    whereClauses.push(`(CAST(COALESCE(json_extract(extra_data, '$.price_overview.final'), 0) AS INTEGER) / 100.0) BETWEEN ? AND ?`);
-    params.push(priceMin, priceMax);
-
-    // Genre filters - use a simple INSTR check against the JSON blob for the genre description strings
-    if (genres.length > 0) {
-      const genreClauses: string[] = [];
-      for (const g of genres) {
-        genreClauses.push(`instr(lower(extra_data), lower(?)) > 0`);
-        params.push(`\"description\":\"${g}\"`); // look for the JSON key/value pair
-      }
-      whereClauses.push(`(${genreClauses.join(' OR ')})`);
-    }
-
-    const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
-
-    // Count total matching rows
-    const countSql = `SELECT COUNT(*) as count FROM steam_games ${whereSql}`;
-    const countResult = db.prepare(countSql).get(...params) as any;
-
-    // Select paginated results with ordering by discount then appid
-    const selectSql = `
-      SELECT
+    // Get all games first, then filter in JavaScript (since JSON filtering in SQLite is complex)
+    const allGames = db.prepare(`
+      SELECT 
         appid,
         name,
         type,
         extra_data,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.final'), 0) AS INTEGER) as price_cents,
-        CAST(COALESCE(json_extract(extra_data, '$.price_overview.discount_percent'), 0) AS INTEGER) as discount_percent
-      FROM steam_games
-      ${whereSql}
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.discount_percent'),
+            0
+          ) AS INTEGER
+        ) as discount_percent,
+        CAST(
+          COALESCE(
+            json_extract(extra_data, '$.price_overview.final'),
+            0
+          ) AS INTEGER
+        ) as price_cents
+      FROM steam_games 
       ORDER BY discount_percent DESC, appid DESC
-      LIMIT ? OFFSET ?
-    `;
+    `).all() as any[];
 
-    const rows = db.prepare(selectSql).all(...params, limit, offset) as any[];
+    // Filter games based on criteria
+    const filteredGames = allGames.filter(game => {
+      const discountPercent = game.discount_percent || 0;
+      const priceEuros = game.price_cents / 100;
 
-    const parsedGames = rows.map(game => {
-      const gameData: any = {
+      // Discount filter
+      if (discountPercent < discountMin || discountPercent > discountMax) {
+        return false;
+      }
+
+      // Price filter
+      if (priceEuros < priceMin || priceEuros > priceMax) {
+        return false;
+      }
+
+      // Genre filter
+      if (genres.length > 0) {
+        try {
+          const extraData = JSON.parse(game.extra_data);
+          const gameTags = extraData.genres?.map((g: any) => g.description) || [];
+          const hasMatchingGenre = genres.some(genre => gameTags.includes(genre));
+          if (!hasMatchingGenre) {
+            return false;
+          }
+        } catch (e) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Apply pagination
+    const paginatedGames = filteredGames.slice(offset, offset + limit);
+
+    // Parse extra_data for paginated results
+    const parsedGames = paginatedGames.map(game => {
+      let gameData: any = {
         appid: game.appid,
         name: game.name,
-        type: game.type,
-        discount_percent: game.discount_percent || 0,
-        price_after_discount: (game.price_cents || 0) / 100
+        type: game.type
       };
 
       try {
         if (game.extra_data && typeof game.extra_data === 'string') {
           const extraData = JSON.parse(game.extra_data);
+          
+          // Extract price information
           if (extraData.price_overview) {
             gameData.price_before_discount = extraData.price_overview.initial / 100;
             gameData.price_after_discount = extraData.price_overview.final / 100;
             gameData.discount_percent = extraData.price_overview.discount_percent;
+          } else {
+            gameData.price_after_discount = 0;
+            gameData.discount_percent = 0;
           }
-          if (extraData.header_image) gameData.image_url = extraData.header_image;
+          
+          // Extract other fields
+          if (extraData.header_image) {
+            gameData.image_url = extraData.header_image;
+          }
+          
           gameData.platforms = extraData.platforms || {};
           gameData.tags = extraData.genres?.map((g: any) => g.description) || [];
           gameData.categories = extraData.categories?.map((c: any) => c.description) || [];
@@ -574,12 +615,12 @@ app.get('/api/games/filter', (req, res) => {
       } catch (e) {
         console.error(`Error parsing game ${game.appid}:`, e);
       }
-
+      
       return gameData;
     });
 
     res.json({
-      count: countResult.count,
+      count: filteredGames.length,
       games: parsedGames
     });
   } catch (error) {
