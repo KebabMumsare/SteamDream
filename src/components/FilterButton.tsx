@@ -110,19 +110,21 @@ function FilterButton({ games, onFilterChange, colors }: FilterProps) {
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 z-[60]"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
             onClick={() => setIsOpen(false)}
           />
           
           {/* Filter Content */}
           <div 
-            className="filter-panel absolute top-full shadow-2xl z-50 overflow-y-auto"
+            className="filter-panel absolute top-full shadow-2xl z-[70] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
             style={{ 
-              backgroundColor: '#004E7B',
+              backgroundColor: '#1B5A7E',
               width: '30vw',
               maxHeight: '70vh',
               marginTop: '0.5vw',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: '3px solid rgba(102, 192, 244, 0.5)',
               right: '0',
               minWidth: '20vw',
               borderRadius: '0.5vw'

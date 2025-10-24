@@ -3,6 +3,7 @@ const mobilePlaceholderStyle = `
   @media (max-width: 450px) {
     .searchbar-mobile-placeholder::placeholder {
       padding-top: 0.7rem;
+      color: white !important;
     }
     .searchbar-mobile-placeholder {
       font-size: 4.3vw !important;
@@ -12,6 +13,7 @@ const mobilePlaceholderStyle = `
     .searchbar-mobile-placeholder::placeholder {
       padding-top: 0;
       line-height: normal;
+      color: white !important;
     }
   }
 `;
@@ -52,8 +54,8 @@ function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
         className="fixed top-0 z-50 mt-[3%] shadow flex items-center text-white rounded-full w-[90vw] mx-auto"
         style={{ 
           backgroundColor: colors.background, 
-          paddingTop: '0.8vw', 
-          paddingBottom: '0.8vw', 
+          paddingTop: '0.4vw', 
+          paddingBottom: '0.4vw', 
           paddingLeft: '2vw', 
           paddingRight: '2vw',
           left: '50%',
@@ -97,17 +99,17 @@ function Navbar({ colors, searchTerm, onSearchChange }: NavbarProps) {
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="searchbar-mobile-placeholder rounded-full text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-[1.3vw] max-[450px]:text-[5vw] placeholder:text-[1.3vw] max-[450px]:placeholder:text-[5vw]"
+            className="searchbar-mobile-placeholder rounded-full text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-[1.3vw] max-[450px]:text-[5vw] placeholder:text-[1.3vw] max-[450px]:placeholder:text-[5vw]"
             style={{
               backgroundColor: colors.primaryBtn,
               width: "100%",
               paddingLeft: "3.5vw",
               paddingRight: "1vw",
-              paddingTop: "1.5vw",
-              paddingBottom: "1.2vw",
+              paddingTop: "0.8vw",
+              paddingBottom: "0.8vw",
               fontSize: "1.3vw",
-              minHeight: '3vw',
-             
+              minHeight: '2.5vw',
+              color: 'white'
             }}
           />
         </div>

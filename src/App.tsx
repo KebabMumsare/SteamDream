@@ -382,18 +382,15 @@ function App() {
               {/* Header Section with Title and Filter */}
               <div className='header-section fixed top-0 left-0 right-0 z-40' 
                    style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 80%, transparent 100%)`, paddingBottom: '1vw' }}>
-                <div className="w-[90vw] mx-auto flex justify-between items-center" style={{ paddingLeft: '2vw', paddingRight: '2vw' }}>
-                  {/* Spacer for left side to balance the layout */}
-                  <div style={{ width: "8vw" }}></div>
-                  
-                  {/* Centered Title */}
-                  <h1 className="header-mobile-title text-white font-bold underline text-center flex-grow" 
-                      style={{ fontSize: "1.9vw" }}>
+                <div className="w-[90vw] mx-auto flex justify-center items-center relative" style={{ paddingLeft: '2vw', paddingRight: '2vw' }}>
+                  {/* Centered Title - Absolutely centered */}
+                  <h1 className="header-mobile-title text-white font-bold underline text-center absolute left-1/2" 
+                      style={{ fontSize: "1.9vw", transform: 'translateX(-50%)', marginLeft: '3vw' }}>
                     SteamDream
                   </h1>
                   
                   {/* Filter Button - Right Side */}
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 ml-auto">
                     <FilterButton 
                       games={games}
                       onFilterChange={setFilters}

@@ -74,7 +74,7 @@ function Favorite({ colors, searchTerm }: FavoriteProps) {
             <div className='z-49 pt-0 pb-[3vw] w-[90vw] fixed top-0 left-0 right-0 mx-auto' style={{ background: `linear-gradient(to bottom, ${colors.headerBg} 0%, ${colors.headerBg} 70%, rgba(0,78,123,0) 100%)`, paddingTop: '10vw' }}>
                 <h1
                   className="text-white font-bold text-center underline"
-                  style={{ fontSize: "1.9vw" }}
+                  style={{ fontSize: "1.9vw", marginLeft: "9vw" }}
         >
                   Favorites
                 </h1>
