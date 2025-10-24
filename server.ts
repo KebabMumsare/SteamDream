@@ -51,13 +51,31 @@ const app = express();
 // Trust proxy for Azure
 app.set('trust proxy', 1);
 
+// Enhanced CORS configuration
+const allowedOrigins = [
+  'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
+  'http://localhost:5173', // Vite dev server
+  'http://localhost:3000', // In case running locally
+  'http://localhost:8080'  // Production build local test
+];
+
 app.use(cors({
-  origin: [
-    'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
-    'http://localhost:5173' // Local development
-  ],
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ CORS blocked origin: ${origin}`);
+      callback(null, true); // Temporarily allow all origins for debugging
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
+
 app.use(express.json());
 
 // Session configuration - CRITICAL for passport-steam with ngrok
@@ -308,6 +326,10 @@ app.get('/api/scraper/game/:appid', (req, res) => {
 
 // Get all games with specific fields (name, price, discount, etc.)
 app.get('/api/games', (req, res) => {
+  console.log('\n📦 GET /api/games called');
+  console.log('   Origin:', req.headers.origin);
+  console.log('   Query params:', req.query);
+  
   try {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
