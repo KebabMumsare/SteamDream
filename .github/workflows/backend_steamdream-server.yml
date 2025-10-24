@@ -17,8 +17,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
@@ -27,24 +25,15 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm ci
+          npm install
           npm run build --if-present
-      
-      - name: Copy production env file
-        run: |
-          cp .env.production .env
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            dist/
-            node_modules/
-            package.json
-            package-lock.json
-            .env
-            SteamDream.db
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_AF31AFEF9A9D4D81A813C307E90F472D }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_056F18B6CD5F4A59BCBF95EDD41270A8 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E8333944E32E4E8595AF797F9B0A9260 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2407378C6A784AB7A7C5209E7C2D8952 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4AF54B33FCDA494CAE13CA561DDBE803 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8F2F911706714FF88B82504811103F23 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
