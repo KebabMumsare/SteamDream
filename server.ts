@@ -53,11 +53,10 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: [
-    'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
-    'http://localhost:5173' // Local development
-  ],
-  credentials: true
+  origin: 'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
