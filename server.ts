@@ -51,7 +51,7 @@ const app = express();
 // Trust proxy for Azure
 app.set('trust proxy', 1);
 
-// Enhanced CORS configuration
+// Robust CORS configuration (allowlist + credentials)
 const allowedOrigins = [
   'https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net',
   'http://localhost:5173', // Vite dev server
@@ -59,20 +59,34 @@ const allowedOrigins = [
   'http://localhost:8080'  // Production build local test
 ];
 
+// Use the cors middleware but echo the origin only when it's in our allowlist.
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
+    // Allow non-browser tools (curl, Postman) which don't send an Origin header
     if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.warn(`⚠️ CORS blocked origin: ${origin}`);
-      callback(null, true); // Temporarily allow all origins for debugging
+
+    if (allowedOrigins.includes(origin)) {
+      // Accept this origin
+      return callback(null, true);
     }
+
+    // Reject others explicitly (browser will block)
+    console.warn(`⚠️ CORS blocked origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+}));
+
+// Preflight handler for all routes (ensures proper headers are returned)
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
