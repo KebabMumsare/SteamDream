@@ -146,8 +146,34 @@ app.get('/auth/user', (req, res) => {
 });
 
 app.get('/auth/logout', (req, res) => {
-  req.logout(() => {
-    res.redirect('/');
+  console.log('\n🚪 Logout requested');
+  console.log('   Session ID:', req.sessionID);
+  console.log('   User:', req.user ? (req.user as any).displayName : 'None');
+  
+  req.logout((err) => {
+    if (err) {
+      console.error('   ❌ Logout error:', err);
+      return res.status(500).json({ error: 'Failed to logout' });
+    }
+    
+    // Destroy the session completely
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('   ❌ Session destroy error:', err);
+      }
+      
+      // Clear the session cookie
+      res.clearCookie('sessionId', { 
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax'
+      });
+      
+      console.log('   ✅ Logout successful - redirecting to home');
+      
+      // Redirect to frontend home page
+      res.redirect('https://steamdream-htceeybjh5aac8b8.swedencentral-01.azurewebsites.net/');
+    });
   });
 });
 
